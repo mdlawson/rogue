@@ -1,8 +1,10 @@
 {print} = require 'util'
 {spawn} = require 'child_process'
 
-task 'build', 'Build lib/ from src/', ->
-  coffee = spawn 'coffee', ['-c', '-o', 'lib', 'src']
+srcFiles = ("src/#{file}.coffee" for file in ['gfx', 'tiles', 'entity', 'input', 'rogue'])
+
+task 'build', 'Build lib/rogue.js from src/', ->
+  coffee = spawn 'coffee', ['-j', 'lib/rogue.js', '-c', srcFiles...]
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->
@@ -11,7 +13,7 @@ task 'build', 'Build lib/ from src/', ->
     callback?() if code is 0
 
 task 'watch', 'Watch src/ for changes', ->
-  coffee = spawn 'coffee', ['-w', '-c', '-o', 'lib', 'src']
+  coffee = spawn 'coffee', ['-j', 'lib/rogue.js', '-cw', srcFiles...]
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->

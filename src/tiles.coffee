@@ -1,5 +1,3 @@
-Rogue = @Rogue or require('rogue')
-
 # A better tilemap, extending jaws
 
 class TileMap
@@ -27,7 +25,3 @@ class TileMap
 		for col in @tiles
 			for tile in col
 				tile.content = []
-
-
-
-Rogue.TileMap = TileMap

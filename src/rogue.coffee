@@ -70,3 +70,4 @@ module?.exports  = Rogue
 Rogue.util      = util
 Rogue.math      = math
 Rogue.GameLoop  = GameLoop
+Rogue.TileMap   = TileMap
