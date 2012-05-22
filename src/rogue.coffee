@@ -88,5 +88,6 @@ module?.exports  = Rogue
 
 Rogue.util      = util
 Rogue.math      = math
+Roge.Game       = Game
 Rogue.GameLoop  = GameLoop
 Rogue.TileMap   = TileMap
