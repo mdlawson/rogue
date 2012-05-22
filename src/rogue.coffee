@@ -1,8 +1,11 @@
 class Game
   constructor: (@options) ->
-    @canvas = document.getElementById options.canvas if options.canvas? else document.createElement "canvas"
-    @width = @canvas.width = options.width ? 400
-    @height = @canvas.height = options.height ? 300
+    @canvas = document.getElementById(options.canvas) if options?.canvas?
+    if not @canvas?
+      @canvas = document.createElement "canvas"
+      document.body.appendChild(@canvas)
+    @width = @canvas.width = options?.width ? 400
+    @height = @canvas.height = options?.height ? 300
     @context = @canvas.getContext('2d')
   start: (@state) ->
     loading = @options.loadingScreen ? ->
@@ -20,16 +23,11 @@ class GameLoop
     @paused = @stopped = false
     @averageFPS = new RollingAverage 20
 
-  animate: window.requestAnimationFrame or 
-       window.webkitRequestAnimationFrame or 
-       window.mozRequestAnimationFrame or
-       window.oRequestAnimationFrame or
-       window.msRequestAnimationFrame
   start: ->
     firstTick = currentTick = lastTick = (new Date()).getTime()
-    amimate @loop
+    requestAnimFrame @loop
 
-  loop: ->
+  loop: =>
     @currentTick = (new Date()).getTime()
     @tickDuration = @currentTick - @lastTick
     @fps = @averageFPS.add(1000/@tickDuration)
@@ -37,7 +35,7 @@ class GameLoop
       @state.update()
       @state.draw()
     unless @stopped
-      animate @loop
+      requestAnimFrame @loop
     @lastTick = @currentTick
   pause: -> 
     @paused = true
@@ -82,6 +80,12 @@ math =
     return (0.5 + num) | 0
 
 # Globals
+
+window.requestAnimFrame =  window.requestAnimationFrame or 
+                           window.webkitRequestAnimationFrame or 
+                           window.mozRequestAnimationFrame or
+                           window.oRequestAnimationFrame or
+                           window.msRequestAnimationFrame
 
 Rogue = @Rogue   = {}
 module?.exports  = Rogue
