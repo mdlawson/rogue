@@ -7,5 +7,5 @@
     "type" : "git", 
     "url": "http://github.com/CyberWalrus/rogue.git"
   }, 
-  "main" : "./index.js"
+  "main" : "./lib/rogue.js"
 }
