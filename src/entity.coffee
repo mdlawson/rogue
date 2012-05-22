@@ -1,0 +1,1 @@
+Rogue = @Rogue or require('rogue')
