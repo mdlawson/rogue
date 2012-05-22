@@ -1,0 +1,11 @@
+{ 
+  "name": "rogue", 
+  "description": "Coffeescript tile based game engine, primarily for creating roguelikes", 
+  "version": "0.0.1", 
+  "author": "CyberWalrus", 
+  "repository": { 
+    "type" : "git", 
+    "url": "http://github.com/CyberWalrus/rogue.git"
+  }, 
+  "main" : "./index.js"
+}
