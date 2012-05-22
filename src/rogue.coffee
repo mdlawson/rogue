@@ -1,3 +1,19 @@
+class Game
+  constructor: (@options) ->
+    @canvas = document.getElementById options.canvas if options.canvas? else document.createElement "canvas"
+    @width = @canvas.width = options.width ? 400
+    @height = @canvas.height = options.height ? 300
+    @context = @canvas.getContext('2d')
+  start: (@state) ->
+    loading = @options.loadingScreen ? ->
+    switchState(@state)
+
+  switchState: (state) ->
+    @loop and @loop.stop()
+    @oldState = @state
+    @loop = new GameLoop @state
+    @loop.start()
+
 class GameLoop
   constructor: (@state) ->
     @fps = 0
@@ -23,7 +39,10 @@ class GameLoop
     unless @stopped
       animate @loop
     @lastTick = @currentTick
-
+  pause: -> 
+    @paused = true
+  stop: ->
+    @stopped = true
 
 class RollingAverage
   constructor: (@size) ->
