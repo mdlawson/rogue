@@ -6,6 +6,7 @@ class AssetManager
 		@assets = {}
 		@filetypes =
 			image: ["png","gif","jpg","jpeg","tiff"]
+			sound: ["mp3","ogg"]
 	add: (url) ->
 		@queue = @queue.concat url
 	get: (src) ->
@@ -41,17 +42,10 @@ class AssetManager
 					Rogue.log 2,"could not load asset: #{@src}"
 					that.loaded @
 				asset.src = src
+
+
 	loaded: (asset) ->
 		@assets[asset.src] = asset
 		percentage = ((@count+@ecount)/@queue.length)*100
 		@onLoad(percentage)
 		if percentage is 100 then @onFinish()
-
-
-
-
-
-
-
-
-

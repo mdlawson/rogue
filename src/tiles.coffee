@@ -1,9 +1,12 @@
-# A better tilemap, extending jaws
-
 class TileMap
 	constructor: (options) ->
-		@res = options.res || [32,32]
-		@size = options.size || [100,100]
+		@x = options.x or 0
+		@y = options.y or 0
+		@res = options.res or [32,32]
+		@size = options.size or [100,100]
+		@width = @size[0]*@res[0]
+		@height = @size[1]*@res[1]
+		@parent = options.parent
 		@tiles = ({} for x in [0...@size[0]] for y in [0...@size[1]])
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
 		for x in [0...@size[0]]
@@ -16,12 +19,35 @@ class TileMap
 	place: (obj) ->
 		if obj.forEach
 			obj.forEach (item) => @place item
-			return obj
-		obj.tile = @tiles[obj.x][obj.y]
-		@tiles[obj.x][obj.y].push(obj)
+		else
+			obj.tile = @tiles[obj.x][obj.y]
+			obj.res = @res
+			obj.parent = @parent
+			@tiles[obj.x][obj.y].push(obj)
 	lookup: (x,y) ->
 		return @tiles[x][y].content
 	clear: ->
 		for col in @tiles
 			for tile in col
 				tile.content = []
+	atRect: (rect) ->
+		tiles = []
+		round = Rogue.math.round
+		x1 = round(rect.x/@res[0])
+		y1 = round(rect.y/@res[1])
+		x2 = round((rect.x+rect.width)/@res[0])
+		y2 = round((rect.y+rect.height)/@res[1])
+		tiles.push(@tiles[x][y]) for x in [x1..x2] for y in [y1..y2]
+		return tiles
+
+	draw: ->
+		tiles = @atRect
+							x: if @parent.x then @parent.x - @x else 0
+							y: if @parent.y then @parent.y - @y else 0
+							width: @parent.width
+							height: @parent.height
+		for tile in tiles
+			for obj in tile.content
+				obj.draw
+
+
