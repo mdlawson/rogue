@@ -32,7 +32,7 @@ class AssetManager
 					canvas = document.createElement "canvas"
 					canvas.width = @width
 					canvas.height = @height
-					canvas.src = @src
+					canvas.src = src
 					context = canvas.getContext "2d"
 					context.drawImage @, 0, 0, @width, @height
 					that.count++

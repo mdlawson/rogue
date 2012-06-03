@@ -6,14 +6,17 @@ class Game
 			document.body.appendChild(@canvas)
 		@width = @canvas.width = options?.width ? 400
 		@height = @canvas.height = options?.height ? 300
+		@canvas.x = @canvas.y = 0
 		@context = @canvas.getContext('2d')
-	start: (@state) ->
-		loading = @options.loadingScreen ? ->
-		@switchState(@state)
+	start: (state) ->
+		loading = @options?.loadingScreen ? ->
+		@switchState(state)
 
 	switchState: (state) ->
 		@loop and @loop.stop()
 		@oldState = @state
+		@state = state
+		@state.setup()
 		@loop = new GameLoop @state
 		@loop.start()
 
@@ -23,12 +26,12 @@ class Game
 class GameLoop
 	constructor: (@state) ->
 		@fps = 0
-		@paused = @stopped = false
 		@averageFPS = new RollingAverage 20
 
 	start: ->
+		@paused = @stopped = false
 		firstTick = currentTick = lastTick = (new Date()).getTime()
-		Rogue.ticker @loop
+		Rogue.ticker.call window, @loop
 
 	loop: =>
 		@currentTick = (new Date()).getTime()
@@ -38,7 +41,7 @@ class GameLoop
 			@state.update()
 			@state.draw()
 		unless @stopped
-			Rogue.ticker @loop
+			Rogue.ticker.call window, @loop
 		@lastTick = @currentTick
 	pause: -> 
 		@paused = true
@@ -135,6 +138,10 @@ Rogue.ticker = window.requestAnimationFrame or
 							 window.mozRequestAnimationFrame or
 							 window.oRequestAnimationFrame or
 							 window.msRequestAnimationFrame
+
+Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
+	document.removeEventListener "DOMContentLoaded", arguments.callee, false
+	f()
 
 Rogue.log          = log
 Rogue.util         = util
