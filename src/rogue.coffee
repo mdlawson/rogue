@@ -110,10 +110,16 @@ class ViewPort
 		if entity.x < buffer then entity.x = buffer
 		if entity.y < buffer then entity.y = buffer
 		if entity.x > w-buffer then entity.x = w-buffer
-		if entity.x > h-buffer then entity.y = h-buffer
+		if entity.y > h-buffer then entity.y = h-buffer
+
+	rect: ->
+		width: @width
+		height: @height
+		x: @viewX
+		y: @viewY
 
 	visible: (entity) ->
-		util.collide entity, @
+		util.collide entity.rect(), @rect()
 
 	keepInBounds: ->
 		if @viewX < 0 then @viewX = 0

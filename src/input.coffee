@@ -24,6 +24,7 @@ class KeyboardManager
 			@release(k,fn) for k in key
 		else
 			if keys[key]? then upFn[keys[key]] = fn else Rogue.log 3, "invalid key: #{key}"
+	
 	pressed: (key) ->
 		if keys[key]? then return pressedKeys[keys[key]] else Rogue.log 3, "invalid key: #{key}"
 
