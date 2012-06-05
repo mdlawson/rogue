@@ -4,6 +4,7 @@ class Game
 		if not @canvas?
 			@canvas = document.createElement "canvas"
 			document.body.appendChild(@canvas)
+		@canvas.tabIndex=1
 		@width = @canvas.width = options?.width ? 400
 		@height = @canvas.height = options?.height ? 300
 		@canvas.x = @canvas.y = 0
@@ -62,11 +63,13 @@ class RollingAverage
 class ViewPort
 	constructor: (@options) ->
 		@canvas = @options.canvas or document.createElement "canvas"
-		@context = @cavas.getContext('2d')
+		@context = @canvas.getContext('2d')
 		@width = @options.width or @canvas.width
 		@height = @options.height or @canvas.height
-		@maxWidth = @options.maxWidth or @width
-		@maxheight = @options.maxHeight or @height
+		@viewWidth = @options.viewWidth or @width
+		@viewHeight = @options.viewHeight or @height
+		@viewX = @options.viewX or 0
+		@viewY = @options.viewY or 0
 		@x = @options.x or 0
 		@y = @options.y or 0
 		@entities = []
@@ -79,33 +82,44 @@ class ViewPort
 			@entities.push(entity)
 
 	draw: ->
+		@context.save()
+		@context.translate(-@viewX, -@viewY)
 		for entity in @entities
 			if @visible entity
-				entity.draw
+				entity.draw()
+		@context.restore()
+		@context.strokeRect(@x,@y,@width,@height)
 
 	move: (x,y) ->
-		@x += x
-		@y += y
+		@viewX += x
+		@viewY += y
 		@keepInBounds()
 
 	moveTo: (x,y) ->
-		@x = x
-		@y = y
+		@viewX = x
+		@viewY = y
 		@keepInBounds()
 
-	centerAround: (entity) ->
-		@x = entity.x - Rogue.math.round(@width/2)
-		@y = entity.y - Rogue.math.round(@height/2)
+	follow: (entity) ->
+		@viewX = entity.x - math.round(@width/2)
+		@viewY = entity.y - math.round(@height/2)
 		@keepInBounds()
+
+	forceInside: (entity, visible=false, buffer=0) ->
+		if visible then w = @width; h = @height else w = @viewWidth; h = @viewHeight
+		if entity.x < buffer then entity.x = buffer
+		if entity.y < buffer then entity.y = buffer
+		if entity.x > w-buffer then entity.x = w-buffer
+		if entity.x > h-buffer then entity.y = h-buffer
 
 	visible: (entity) ->
-		(entity.x >= @x and entity.y >= @y) or ((entity.x+entity.width) <= (@x+@width) and (entity.y+entity.height) <= (@y+@height))
+		util.collide entity, @
 
 	keepInBounds: ->
-		if @x < 0 then @x = 0
-		if @y < 0 then @y = 0
-		if @x+@width > @maxWidth then @x = @maxWidth - @width
-		if @y+@height > @maxHeight then @y = @maxHeight - @height
+		if @viewX < 0 then @viewX = 0
+		if @viewY < 0 then @viewY = 0
+		if @viewX+@width > @viewWidth then @viewX = @viewWidth - @width
+		if @viewY+@height > @viewHeight then @viewY = @viewHeight - @height
 
 
 
@@ -121,6 +135,8 @@ log = (level, args...) ->
 util =
 	isArray: (value) ->
 		Object::toString.call(value) is '[object Array]'
+	collide: (r1,r2) ->
+		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)	
 
 # Maths
 
@@ -143,14 +159,15 @@ Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
 	document.removeEventListener "DOMContentLoaded", arguments.callee, false
 	f()
 
-Rogue.log          = log
-Rogue.util         = util
-Rogue.math         = math
-Rogue.Game         = Game
-Rogue.GameLoop     = GameLoop
-Rogue.TileMap      = TileMap
-Rogue.AssetManager = AssetManager
-Rogue.ViewPort     = ViewPort
-Rogue.Entity       = Entity
+Rogue.log             = log
+Rogue.util            = util
+Rogue.math            = math
+Rogue.Game            = Game
+Rogue.GameLoop        = GameLoop
+Rogue.TileMap         = TileMap
+Rogue.AssetManager    = AssetManager
+Rogue.ViewPort        = ViewPort
+Rogue.Entity          = Entity
+Rogue.KeyboardManager = KeyboardManager
 
 Rogue.loglevel = 6

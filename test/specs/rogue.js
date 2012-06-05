@@ -8,8 +8,7 @@
 
   describe('Game', function() {
     return it('can be created', function() {
-      window.testGame = new Rogue.Game();
-      return expect(window.testGame).toBeDefined();
+      return expect(window.app.game).toBeDefined();
     });
   });
 

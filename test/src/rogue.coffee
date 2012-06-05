@@ -4,6 +4,5 @@ describe 'Rogue', ->
 
 describe 'Game', ->
 	it 'can be created', ->
-		window.testGame = new Rogue.Game()
-		expect(window.testGame).toBeDefined()
+		expect(window.app.game).toBeDefined()
 		
