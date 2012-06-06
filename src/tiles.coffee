@@ -1,5 +1,5 @@
 class TileMap
-	constructor: (options) ->
+	constructor: (options={}) ->
 		@x = options.x or 0
 		@y = options.y or 0
 		@res = options.res or [32,32]
@@ -23,7 +23,7 @@ class TileMap
 			obj.tile = @tiles[obj.x][obj.y]
 			obj.res = @res
 			obj.parent = @parent
-			@tiles[obj.x][obj.y].push(obj)
+			@tiles[obj.x][obj.y].content.unshift(obj)
 	lookup: (x,y) ->
 		return @tiles[x][y].content
 	clear: ->
@@ -37,7 +37,7 @@ class TileMap
 		y1 = round(rect.y/@res[1])
 		x2 = round((rect.x+rect.width)/@res[0])
 		y2 = round((rect.y+rect.height)/@res[1])
-		tiles.push(@tiles[x][y]) for x in [x1..x2] for y in [y1..y2]
+		(if @tiles[x]?[y]? then tiles.push(@tiles[x][y].content)) for x in [x1..x2] for y in [y1..y2]
 		return tiles
 
 	draw: ->
@@ -47,7 +47,7 @@ class TileMap
 							width: @parent.width
 							height: @parent.height
 		for tile in tiles
-			for obj in tile.content
-				obj.draw
-
+			for obj in tile
+				obj.draw()
+	rect: -> @
 

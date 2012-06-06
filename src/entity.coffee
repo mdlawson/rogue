@@ -19,7 +19,7 @@ class Entity
 
 	draw: ->
 		@parent.context.save()
-		@parent.context.translate(@x*@res[0]-@xOffset, @y*@res[1]-@yOffset)
+		@parent.context.translate((@x*@res[0])-@xOffset, (@y*@res[1])-@yOffset)
 		@parent.context.drawImage(@image, 0, 0, @width, @height)
 		@parent.context.restore()
 

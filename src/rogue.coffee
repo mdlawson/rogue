@@ -84,11 +84,13 @@ class ViewPort
 	draw: ->
 		@context.save()
 		@context.translate(-@viewX, -@viewY)
+		@context.beginPath()
+		@context.rect(@x+@viewX, @y+@viewY, @width, @height)
+		@context.clip()
 		for entity in @entities
 			if @visible entity
 				entity.draw()
 		@context.restore()
-		@context.strokeRect(@x,@y,@width,@height)
 
 	move: (x,y) ->
 		@viewX += x
