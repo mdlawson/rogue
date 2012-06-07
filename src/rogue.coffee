@@ -18,7 +18,8 @@ class Game
 		@oldState = @state
 		@state = state
 		@state.setup()
-		@loop = new GameLoop @state
+		@loop = new GameLoop
+		@loop.add [@state.update,@state.draw]
 		@loop.start()
 
 	clear: ->
@@ -28,6 +29,7 @@ class GameLoop
 	constructor: (@state) ->
 		@fps = 0
 		@averageFPS = new RollingAverage 20
+		@call = []
 
 	start: ->
 		@paused = @stopped = false
@@ -39,8 +41,7 @@ class GameLoop
 		@tickDuration = @currentTick - @lastTick
 		@fps = @averageFPS.add(1000/@tickDuration)
 		unless @stopped or @paused
-			@state.update()
-			@state.draw()
+			func() for func in @call
 		unless @stopped
 			Rogue.ticker.call window, @loop
 		@lastTick = @currentTick
@@ -48,6 +49,8 @@ class GameLoop
 		@paused = true
 	stop: ->
 		@stopped = true
+	add: (func) ->
+		@call = @call.concat func
 
 class RollingAverage
 	constructor: (@size) ->
@@ -144,7 +147,18 @@ util =
 	isArray: (value) ->
 		Object::toString.call(value) is '[object Array]'
 	collide: (r1,r2) ->
-		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)	
+		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)
+	mixin: (obj, mixin)	->
+		obj[name] = method for name, method of mixin        
+		obj
+	import: (components,obj) ->
+		for comp in components
+			if comp not in obj.components
+				obj.components.push comp
+				c[comp].init.apply(obj)
+				util.mixin obj, c[comp]
+				delete obj.init; delete obj.import
+
 
 # Maths
 
@@ -175,6 +189,7 @@ Rogue.GameLoop        = GameLoop
 Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
 Rogue.ViewPort        = ViewPort
+Rogue.components      = c
 Rogue.Entity          = Entity
 Rogue.KeyboardManager = KeyboardManager
 
