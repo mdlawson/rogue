@@ -1,5 +1,8 @@
+e = []
+
 class Entity
 	constructor: (@options) ->
+		e.push @
 		@components=[]
 		util.mixin @, @options
 		if @import then util.import(@import,@)
@@ -38,11 +41,25 @@ c.movable =
 
 	moveTo: (@x,@y) ->
 
-c.tilemove =
+c.tile =
 	init: ->
 		util.import(["drawable"],@)
 	move: (x,y) ->
-		dest = @tile
 		@tile.contents.splice(@tile.contents.indexOf(@),1)
-		dir1 = if x < 0 then 'n' else 's'
-		dir2 = if y < 0 then 'e' else 'w'
+		@x += x
+		@y += y
+		@tile.parent.place @
+	moveTo: (@x,@y) ->
+		@tile.contents.splice(@tile.contents.indexOf(@),1)
+		@tile.parent.place @
+	rect: ->
+		x: (@res[0]*@x)-@xOffset
+		y: (@res[1]*@y)-@yOffset
+		width: @width
+		height: @height
+
+c.collide =
+	init: ->
+		util.import(["drawable"],@)
+	collide: (obj) ->
+		util.collide @rect(), obj.rect()

@@ -159,7 +159,14 @@ util =
 				util.mixin obj, c[comp]
 				delete obj.init; delete obj.import
 
-
+find = (c) ->
+	found = []
+	for ent in e
+			f = 0
+			f++ for i in c when i in ent.components
+			if f is c.length
+				found.push ent
+	return found
 # Maths
 
 math =
@@ -190,7 +197,9 @@ Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
 Rogue.ViewPort        = ViewPort
 Rogue.components      = c
+Rogue.e               = e
 Rogue.Entity          = Entity
+Rogue.find            = find
 Rogue.KeyboardManager = KeyboardManager
 
 Rogue.loglevel = 6

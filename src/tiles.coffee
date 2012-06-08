@@ -7,7 +7,7 @@ class TileMap
 		@width = @size[0]*@res[0]
 		@height = @size[1]*@res[1]
 		@parent = options.parent
-		@tiles = ({} for x in [0...@size[0]] for y in [0...@size[1]])
+		@tiles = ({parent: @} for x in [0...@size[0]] for y in [0...@size[1]])
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
 		for x in [0...@size[0]]
 			for y in [0...@size[1]]
@@ -20,6 +20,7 @@ class TileMap
 		if obj.forEach
 			obj.forEach (item) => @place item
 		else
+			util.import(["tile"],obj)
 			obj.tile = @tiles[obj.x][obj.y]
 			obj.res = @res
 			obj.parent = @parent
