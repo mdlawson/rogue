@@ -17,13 +17,23 @@
         app.player = new Rogue.Entity({
           parent: app.game,
           image: app.assets.get('img/2.png'),
-          "import": ["movable"]
+          "import": ["movable", "collide"]
+        });
+        app.player2 = new Rogue.Entity({
+          parent: app.game,
+          image: app.assets.get('img/2.png'),
+          "import": ["movable", "collide"],
+          x: 64,
+          y: 64
         });
         app.tiles = new Rogue.TileMap({
           size: [20, 20]
         });
-        app.viewport.add(app.tiles);
-        app.viewport.add(app.player);
+        app.viewport.add([app.tiles, app.player, app.player2]);
+        app.viewport.updates.unshift(function() {
+          app.viewport.follow(app.player);
+          return app.viewport.forceInside(app.player, false);
+        });
         app.blocks = [];
         for (y = 0, _ref = app.tiles.size[1]; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
           for (x = 0, _ref2 = app.tiles.size[0]; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
@@ -42,12 +52,8 @@
         if (app.input.pressed("left")) app.player.x -= 2;
         if (app.input.pressed("up")) app.player.y -= 2;
         if (app.input.pressed("down")) app.player.y += 2;
-        app.viewport.follow(app.player);
-        return app.viewport.forceInside(app.player, false);
-      },
-      draw: function() {
         app.game.clear();
-        return app.viewport.draw();
+        return app.viewport.update();
       }
     };
     app.assets = new Rogue.AssetManager();

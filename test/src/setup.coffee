@@ -14,11 +14,19 @@ Rogue.ready ->
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: app.assets.get 'img/2.png'
-				import: ["movable"]
+				import: ["movable","collide"]
+			app.player2 = new Rogue.Entity
+				parent: app.game
+				image: app.assets.get 'img/2.png'
+				import: ["movable","collide"]
+				x: 64
+				y: 64
 			app.tiles = new Rogue.TileMap
 				size: [20,20]
-			app.viewport.add app.tiles
-			app.viewport.add app.player
+			app.viewport.add [app.tiles, app.player, app.player2]
+			app.viewport.updates.unshift ->
+				app.viewport.follow app.player
+				app.viewport.forceInside app.player, false
 			app.blocks = []
 			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: y, import: ["drawable"]})) for x in [0...app.tiles.size[0]] for y in [0...app.tiles.size[1]]
 			app.tiles.place app.blocks
@@ -31,12 +39,9 @@ Rogue.ready ->
 				app.player.y -= 2
 			if app.input.pressed("down")
 				app.player.y += 2
-			app.viewport.follow app.player
-			app.viewport.forceInside app.player, false
-		draw: ->
+
 			app.game.clear()
-			#app.player.draw()
-			app.viewport.draw()
+			app.viewport.update()
 	app.assets = new Rogue.AssetManager()
 	app.assets.add ['img/1.png','img/2.png']
 	app.assets.loadAll

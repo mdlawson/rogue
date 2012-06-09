@@ -7,15 +7,19 @@ class AssetManager
 		@filetypes =
 			image: ["png","gif","jpg","jpeg","tiff"]
 			sound: ["mp3","ogg"]
+
 	add: (url) ->
 		@queue = @queue.concat url
+
 	get: (src) ->
 		if not @assets[src]? then Rogue.log 2,"asset not loaded: #{src}"
 		@assets[src]
+
 	loadAll: (options) ->
 		@onFinish = options.onFinish
 		@onLoad = options.onLoad
 		@load(a) for a in @queue
+
 	load: (src) ->
 		that = @
 		ext = src.split(".").pop()
@@ -42,8 +46,7 @@ class AssetManager
 					Rogue.log 2,"could not load asset: #{@src}"
 					that.loaded @
 				asset.src = src
-
-
+				
 	loaded: (asset) ->
 		@assets[asset.src] = asset
 		percentage = ((@count+@ecount)/@queue.length)*100

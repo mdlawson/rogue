@@ -9,6 +9,7 @@ class Game
 		@height = @canvas.height = options?.height ? 300
 		@canvas.x = @canvas.y = 0
 		@context = @canvas.getContext('2d')
+
 	start: (state) ->
 		loading = @options?.loadingScreen ? ->
 		@switchState(state)
@@ -19,7 +20,7 @@ class Game
 		@state = state
 		@state.setup()
 		@loop = new GameLoop
-		@loop.add [@state.update,@state.draw]
+		@loop.add @state.update
 		@loop.start()
 
 	clear: ->
@@ -45,10 +46,13 @@ class GameLoop
 		unless @stopped
 			Rogue.ticker.call window, @loop
 		@lastTick = @currentTick
+
 	pause: -> 
 		@paused = true
+
 	stop: ->
 		@stopped = true
+
 	add: (func) ->
 		@call = @call.concat func
 
@@ -56,6 +60,7 @@ class RollingAverage
 	constructor: (@size) ->
 		@values = new Array @size
 		@count = 0
+
 	add: (value) ->
 		@values = @values[1...@size]
 		@values.push value
@@ -63,7 +68,7 @@ class RollingAverage
 		return parseInt (@values.reduce (t, s) -> t+s)/@count
 
 
-class ViewPort
+class ViewPort extends Entity
 	constructor: (@options) ->
 		@canvas = @options.canvas or document.createElement "canvas"
 		@context = @canvas.getContext('2d')
@@ -76,6 +81,7 @@ class ViewPort
 		@x = @options.x or 0
 		@y = @options.y or 0
 		@entities = []
+		@updates = [@draw]
 
 	add: (entity) ->
 		if entity.forEach
@@ -92,7 +98,7 @@ class ViewPort
 		@context.clip()
 		for entity in @entities
 			if @visible entity
-				entity.draw()
+				entity.update()
 		@context.restore()
 
 	move: (x,y) ->
@@ -146,17 +152,23 @@ log = (level, args...) ->
 util =
 	isArray: (value) ->
 		Object::toString.call(value) is '[object Array]'
+
+	remove: (a,val) ->
+		a.splice a.indexOf(val), 1
+
 	collide: (r1,r2) ->
 		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)
+
 	mixin: (obj, mixin)	->
 		obj[name] = method for name, method of mixin        
 		obj
+
 	import: (components,obj) ->
 		for comp in components
 			if comp not in obj.components
 				obj.components.push comp
-				c[comp].init.apply(obj)
 				util.mixin obj, c[comp]
+				c[comp].init.apply(obj)
 				delete obj.init; delete obj.import
 
 find = (c) ->

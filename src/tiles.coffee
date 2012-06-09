@@ -1,4 +1,4 @@
-class TileMap
+class TileMap extends Entity
 	constructor: (options={}) ->
 		@x = options.x or 0
 		@y = options.y or 0
@@ -8,6 +8,7 @@ class TileMap
 		@height = @size[1]*@res[1]
 		@parent = options.parent
 		@tiles = ({parent: @} for x in [0...@size[0]] for y in [0...@size[1]])
+		@updates =[@draw]
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
 		for x in [0...@size[0]]
 			for y in [0...@size[1]]
@@ -16,6 +17,7 @@ class TileMap
 				@tiles[x][y].content = []
 				for d,calc of dirs
 					@tiles[x][y][d] = if @tiles[x+calc[0]]? and @tiles[x+calc[0]][y+calc[1]]? then @tiles[x+calc[0]][y+calc[1]] else null
+
 	place: (obj) ->
 		if obj.forEach
 			obj.forEach (item) => @place item
@@ -25,12 +27,15 @@ class TileMap
 			obj.res = @res
 			obj.parent = @parent
 			@tiles[obj.x][obj.y].content.unshift(obj)
+
 	lookup: (x,y) ->
 		return @tiles[x][y].content
+
 	clear: ->
 		for col in @tiles
 			for tile in col
 				tile.content = []
+
 	atRect: (rect) ->
 		tiles = []
 		round = Rogue.math.round
@@ -50,5 +55,6 @@ class TileMap
 		for tile in tiles
 			for obj in tile
 				obj.draw()
+
 	rect: -> @
 
