@@ -8,6 +8,7 @@ Rogue.ready ->
 		setup: ->
 			console.log "setup run"
 			app.viewport = new Rogue.ViewPort
+				parent: app.game
 				canvas: app.game.canvas
 				viewWidth: 1000
 				viewHeight: 1000

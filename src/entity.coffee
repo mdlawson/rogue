@@ -74,7 +74,7 @@ c.collide =
 		util.collide @rect(), obj.rect()
 
 	colliding: ->
-		solid = Rogue.find(["collide"])
+		solid = @parent.find(["collide"])
 		util.remove solid, @
 		results = []
 		results.push obj for obj in solid when @collide(obj)

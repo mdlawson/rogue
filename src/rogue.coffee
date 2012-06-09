@@ -15,6 +15,7 @@ class Game
 		@switchState(state)
 
 	switchState: (state) ->
+		@e = []
 		@loop and @loop.stop()
 		@oldState = @state
 		@state = state
@@ -25,6 +26,10 @@ class Game
 
 	clear: ->
 		@context.clearRect(0,0,@width,@height)
+
+	find: (c) ->
+		find.call(@,c)
+
 
 class GameLoop
 	constructor: (@state) ->
@@ -72,6 +77,7 @@ class ViewPort extends Entity
 	constructor: (@options) ->
 		@canvas = @options.canvas or document.createElement "canvas"
 		@context = @canvas.getContext('2d')
+		@parent = @options.parent
 		@width = @options.width or @canvas.width
 		@height = @options.height or @canvas.height
 		@viewWidth = @options.viewWidth or @width
@@ -80,7 +86,7 @@ class ViewPort extends Entity
 		@viewY = @options.viewY or 0
 		@x = @options.x or 0
 		@y = @options.y or 0
-		@entities = []
+		@e = []
 		@updates = [@draw]
 
 	add: (entity) ->
@@ -88,7 +94,8 @@ class ViewPort extends Entity
 			entity.forEach (obj) => @add obj
 		else
 			entity.parent = @
-			@entities.push(entity)
+			@e.push(entity)
+			@parent.e.push(entity)
 
 	draw: ->
 		@context.save()
@@ -96,7 +103,7 @@ class ViewPort extends Entity
 		@context.beginPath()
 		@context.rect(@x+@viewX, @y+@viewY, @width, @height)
 		@context.clip()
-		for entity in @entities
+		for entity in @e
 			if @visible entity
 				entity.update()
 		@context.restore()
@@ -138,6 +145,9 @@ class ViewPort extends Entity
 		if @viewX+@width > @viewWidth then @viewX = @viewWidth - @width
 		if @viewY+@height > @viewHeight then @viewY = @viewHeight - @height
 
+	find: (c) ->
+		find.call(@,c)
+
 
 
 # Logging
@@ -173,7 +183,7 @@ util =
 
 find = (c) ->
 	found = []
-	for ent in e
+	for ent in @e
 			f = 0
 			f++ for i in c when i in ent.components
 			if f is c.length
@@ -211,7 +221,6 @@ Rogue.ViewPort        = ViewPort
 Rogue.components      = c
 Rogue.e               = e
 Rogue.Entity          = Entity
-Rogue.find            = find
 Rogue.KeyboardManager = KeyboardManager
 
 Rogue.loglevel = 6
