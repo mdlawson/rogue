@@ -9,6 +9,14 @@
       setup: function() {
         var x, y, _ref, _ref2;
         console.log("setup run");
+        app.sprites = new Rogue.SpriteSheet({
+          image: app.assets.get('img/2.png'),
+          res: [16, 16]
+        });
+        app.animation = new Rogue.Animation({
+          spritesheet: app.sprites,
+          speed: 15
+        });
         app.viewport = new Rogue.ViewPort({
           parent: app.game,
           canvas: app.game.canvas,
@@ -17,9 +25,17 @@
         });
         app.player = new Rogue.Entity({
           parent: app.game,
-          image: app.assets.get('img/2.png'),
+          image: app.animation.next(),
           "import": ["movable", "collide"]
         });
+        app.player.move = function(x, y) {
+          this.x += x;
+          this.y += y;
+          if (this.colliding().length > 0) {
+            this.x -= x;
+            return this.y -= y;
+          }
+        };
         app.player2 = new Rogue.Entity({
           parent: app.game,
           image: app.assets.get('img/2.png'),
@@ -49,10 +65,11 @@
         return app.tiles.place(app.blocks);
       },
       update: function() {
-        if (app.input.pressed("right")) app.player.x += 2;
-        if (app.input.pressed("left")) app.player.x -= 2;
-        if (app.input.pressed("up")) app.player.y -= 2;
-        if (app.input.pressed("down")) app.player.y += 2;
+        if (app.input.pressed("right")) app.player.move(2, 0);
+        if (app.input.pressed("left")) app.player.move(-2, 0);
+        if (app.input.pressed("up")) app.player.move(0, -2);
+        if (app.input.pressed("down")) app.player.move(0, 2);
+        app.player.image = app.animation.next();
         app.game.clear();
         return app.viewport.update();
       }

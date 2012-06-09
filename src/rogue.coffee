@@ -2,7 +2,7 @@ class Game
 	constructor: (@options) ->
 		@canvas = document.getElementById(options.canvas) if options?.canvas?
 		if not @canvas?
-			@canvas = document.createElement "canvas"
+			@canvas = util.canvas()
 			document.body.appendChild(@canvas)
 		@canvas.tabIndex=1
 		@width = @canvas.width = options?.width ? 400
@@ -75,7 +75,7 @@ class RollingAverage
 
 class ViewPort extends Entity
 	constructor: (@options) ->
-		@canvas = @options.canvas or document.createElement "canvas"
+		@canvas = @options.canvas or util.canvas()
 		@context = @canvas.getContext('2d')
 		@parent = @options.parent
 		@width = @options.width or @canvas.width
@@ -160,6 +160,8 @@ log = (level, args...) ->
 # Utilities
 
 util =
+	canvas: -> document.createElement("canvas")
+
 	isArray: (value) ->
 		Object::toString.call(value) is '[object Array]'
 
@@ -217,6 +219,8 @@ Rogue.Game            = Game
 Rogue.GameLoop        = GameLoop
 Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
+Rogue.SpriteSheet     = SpriteSheet
+Rogue.Animation       = Animation
 Rogue.ViewPort        = ViewPort
 Rogue.components      = c
 Rogue.e               = e
