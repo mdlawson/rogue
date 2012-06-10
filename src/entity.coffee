@@ -1,12 +1,10 @@
-e = []
-
 class Entity
 	constructor: (@options) ->
-		e.push @
 		@components=[]
 		@updates=[]
 		util.mixin @, @options
 		if @import then util.import(@import,@)
+		if @parent then @parent.e.push @
 
 	update: ->
 		func.call(@) for func in @updates

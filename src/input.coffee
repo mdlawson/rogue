@@ -7,7 +7,7 @@ class KeyboardManager
 			return unless e.target is @context
 			if e.type is 'keyup' then key = false; fn = upFn else key = true; fn = downFn
 			pressedKeys[e.keyCode] = key
-			if e.keyCode in upFn then fn[e.keyCode]()
+			if e.keyCode in fn then fn[e.keyCode]()
 			e.preventDefault()
 
 		window.addEventListener('keyup', handleEvent,false)

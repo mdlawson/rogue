@@ -1,4 +1,14 @@
+###
+# RogueJS #
+
+This is the main RogueJS module. Contains classes for constructing 
+the skeleton of a game. Also contains utility functions
+###
+
 class Game
+	###
+	The Game class. This is where the game state and canvas are managed.
+	###
 	constructor: (@options) ->
 		@canvas = document.getElementById(options.canvas) if options?.canvas?
 		if not @canvas?
@@ -9,10 +19,22 @@ class Game
 		@height = @canvas.height = options?.height ? 300
 		@canvas.x = @canvas.y = 0
 		@context = @canvas.getContext('2d')
+		### 
+		Options:
+		+ canvas: the ID of an existing canvas element to use
+		+ width: the width to set the canvas to, default: 400
+		+ height: the height to set the canvas to, default: 300
+		###
 
 	start: (state) ->
 		loading = @options?.loadingScreen ? ->
 		@switchState(state)
+		###
+		Starts the game with a state:
+		A state is an object with 2 methods, a start method, 
+		which is run when the state is first loaded, and a
+		update method, which is run every tick. 
+		###
 
 	switchState: (state) ->
 		@e = []
@@ -23,15 +45,29 @@ class Game
 		@loop = new GameLoop
 		@loop.add @state.update
 		@loop.start()
+		###
+		Switches the game to a new state. Old state is stored in oldState.
+		A GameLoop instance is automatically created. 
+		###
 
 	clear: ->
 		@context.clearRect(0,0,@width,@height)
+		###
+		Clears the canvas, can be run at the end of each frame.
+		TODO: automatic partical update system.
+		###
 
 	find: (c) ->
 		find.call(@,c)
+		###
+		Used to find entitys with given components within the namespace of the game.
+		###
 
 
 class GameLoop
+	###
+	The GameLoop class. Runs a list of functions, stored in @call, every tick
+	###
 	constructor: (@state) ->
 		@fps = 0
 		@averageFPS = new RollingAverage 20
@@ -223,7 +259,6 @@ Rogue.SpriteSheet     = SpriteSheet
 Rogue.Animation       = Animation
 Rogue.ViewPort        = ViewPort
 Rogue.components      = c
-Rogue.e               = e
 Rogue.Entity          = Entity
 Rogue.KeyboardManager = KeyboardManager
 

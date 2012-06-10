@@ -5,6 +5,7 @@ srcFiles = ("src/#{file}.coffee" for file in ['gfx', 'assets', 'entity', 'tiles'
 
 task 'build', 'Build lib/rogue.js from src/', ->
   coffee = exec "coffee -j lib/rogue.js -c #{srcFiles}"
+  min = exec "uglifyjs -o lib/rogue.min.js lib/rogue.js"
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->
@@ -14,6 +15,7 @@ task 'build', 'Build lib/rogue.js from src/', ->
 
 task 'watch', 'Watch src/ for changes', ->
   coffee = exec "coffee -j lib/rogue.js -cw #{srcFiles}"
+  min = exec "uglifyjs -o lib/rogue.min.js  lib/rogue.js"
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->
