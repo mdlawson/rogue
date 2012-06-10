@@ -25,7 +25,8 @@ Rogue.ready ->
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: app.animation.next()
-				import: ["movable","collide"]
+				scaleFactor: 2
+				import: ["move","collide"]
 
 			app.player.move = (x,y) ->
 				@x += x
@@ -37,7 +38,7 @@ Rogue.ready ->
 			app.player2 = new Rogue.Entity
 				parent: app.game
 				image: app.assets.get 'img/2.png'
-				import: ["movable","collide"]
+				import: ["move","collide"]
 				x: 64
 				y: 64
 
@@ -50,7 +51,7 @@ Rogue.ready ->
 				app.viewport.forceInside app.player, false
 
 			app.blocks = []
-			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: y, import: ["drawable"]})) for x in [0...app.tiles.size[0]] for y in [0...app.tiles.size[1]]
+			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: y, import: ["sprite"]})) for x in [0...app.tiles.size[0]] for y in [0...app.tiles.size[1]]
 			
 			app.tiles.place app.blocks
 
@@ -76,7 +77,7 @@ Rogue.ready ->
 		onFinish: -> 
 			console.log "Assets Loaded"
 			app.game.start app.state
-			
+
 		onLoad: (percent) -> console.log "Assets loading: #{percent}"
 
 	window.app = app

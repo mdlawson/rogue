@@ -11,31 +11,42 @@ class Entity
 
 c = {}
 
-c.drawable =
+c.sprite =
 	init: ->
-		unless @image then log 2, "Drawable entitys require an image"
+		unless @image then log 2, "Sprite entitys require an image"
 		@width ?= @image.width
 		@height ?= @image.height
 		@x ?= 0
 		@y ?= 0
 		@res ?= [1,1] 
-		@xOffset ?= math.round(@image.width/2)
-		@yOffset ?= math.round(@image.height/2)
+		@xOffset ?= math.round(@width/2)
+		@yOffset ?= math.round(@height/2)
+		if @scaleFactor then @scale @scaleFactor
 		@updates.push @draw
 	draw: ->
-		@parent.context.save()
-		@parent.context.translate((@x*@res[0])-@xOffset, (@y*@res[1])-@yOffset)
-		@parent.context.drawImage(@image, 0, 0, @width, @height)
-		@parent.context.restore()
+		c = @parent.context
+		c.save()
+		c.translate((@x*@res[0])-@xOffset, (@y*@res[1])-@yOffset)
+		if @angle then c.rotate(@angle*Math.PI/180)
+		if @alpha then c.globalAlpha = @alpha
+		c.drawImage(@image, 0, 0, @width, @height)
+		c.restore()
+	scale: (factor) ->
+		@image = gfx.scale @image,factor
+		@width = @image.width
+		@height = @image.height
+		@xOffset = math.round(@width/2)
+		@yOffset = math.round(@height/2)
+
 	rect: ->
 		x: @x-@xOffset
 		y: @y-@yOffset
 		width: @width
 		height: @height
 
-c.movable =
+c.move =
 	init: ->
-		util.import(["drawable"],@)
+		util.import(["sprite"],@)
 
 	move: (x,y) ->
 		@x += x
@@ -45,7 +56,7 @@ c.movable =
 
 c.tile =
 	init: ->
-		util.import ["drawable"], @
+		util.import ["sprite"], @
 
 	move: (x,y) ->
 		util.remove @tile.contents, @
@@ -65,7 +76,7 @@ c.tile =
 
 c.collide =
 	init: ->
-		util.import(["drawable"],@)
+		util.import(["sprite"],@)
 		@updates.unshift @colliding
 
 	collide: (obj) ->
