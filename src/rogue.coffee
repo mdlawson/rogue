@@ -190,7 +190,12 @@ class ViewPort extends Entity
 
 log = (level, args...) ->
 	return unless level <= Rogue.loglevel
-	console?.log?("(Rogue)", args...)
+	switch level
+		when 1 then func = console.error or console.log
+		when 2 then func = console.warn or console.log
+		when 3 then func = console.info or console.log
+		when 4 then func = console.debug or console.log
+	func.call(console,"(Rogue)", args...)
 	this
 
 # Utilities
@@ -262,4 +267,4 @@ Rogue.components      = c
 Rogue.Entity          = Entity
 Rogue.KeyboardManager = KeyboardManager
 
-Rogue.loglevel = 6
+Rogue.loglevel = 4
