@@ -1,7 +1,7 @@
 class Entity
 	constructor: (@options) ->
 		@components=[]
-		@updates=[]
+		@updates={}
 		util.mixin @, @options
 		if @require then @import(@require)
 		if @parent then @parent.e.push @
@@ -10,7 +10,7 @@ class Entity
 		util.import(@, imports) 
 
 	update: ->
-		func.call(@) for func in @updates
+		func.call(@) for key,func of @updates
 
 c = {}
 
@@ -24,11 +24,12 @@ class c.sprite
 		@xOffset ?= math.round(@width/2)
 		@yOffset ?= math.round(@height/2)
 		if @scaleFactor then @scale @scaleFactor
-		@updates.push @draw
+		@updates[99] = @draw
 	draw: ->
 		c = @parent.context
+		r = math.round
 		c.save()
-		c.translate(@x-@xOffset, @y-@yOffset)
+		c.translate(r(@x-@xOffset), r(@y-@yOffset))
 		if @angle then c.rotate(@angle*Math.PI/180)
 		if @alpha then c.globalAlpha = @alpha
 		c.drawImage(@image, 0, 0, @width, @height)
@@ -48,7 +49,11 @@ class c.sprite
 
 class c.move
 	init: ->
-		@import ["sprite"] 
+		@import ["sprite"]
+		@dy ?= 0
+		@dx ?= 0
+		@updates[97] = ->
+			@move math.round(@dx),math.round(-@dy)
 
 	move: (x,y) ->
 		@x += x
@@ -79,7 +84,7 @@ class c.tile
 class c.collide
 	init: ->
 		@import ["sprite"]
-		@updates.unshift @colliding
+		@updates[98] = @colliding
 
 	collide: (obj) ->
 		util.collide @rect(), obj.rect()
@@ -91,11 +96,11 @@ class c.collide
 		results.push obj for obj in solid when @collide(obj)
 		return results
 	move: (x,y) ->
-				@x += x
-				@y += y
-				if @colliding().length > 0
-					@x -= x
-					@y -= y
+		@x += x
+		@y += y
+		if @colliding().length > 0
+			@x -= x
+			@y -= y
 
 class c.collidePixel
 	init: ->
@@ -115,9 +120,10 @@ class c.layer extends c.sprite
 		@scrollY ?= false
 		@scrollX ?= true
 		@speed ?= 0
-		@updates.push @draw
+		@updates[99] = @draw
 	draw: (x=0, y=0)->
 		rect = @parent.rect()
+		r = math.round
 		unless x > 0 or y > 0
 			if @scrollX then @x = (rect.x - @x)*@speed | 0
 			if @scrollY then @y = (rect.y - @y)*@speed | 0
@@ -125,7 +131,7 @@ class c.layer extends c.sprite
 		c.save()
 		if @angle then c.rotate(@angle*Math.PI/180)
 		if @alpha then c.globalAlpha = @alpha
-		c.translate(@x+x,@y+y)
+		c.translate(r(@x+x),r(@y+y))
 		c.drawImage(@image, 0, 0, @width, @height)
 		c.restore()
 		if @repeatX and @x+@width+x < rect.x+rect.width
@@ -133,7 +139,13 @@ class c.layer extends c.sprite
 		if @repeatY and @y+@height+y < rect.y+rect.height
 			@draw(0,y+@height)
 
-
+class c.gravity
+	init: ->
+		@import ["move"]
+		@gravity ?= -10
+		@updates[96] = ->
+			if @dy > @gravity
+				@dy -= 1
 
 
 

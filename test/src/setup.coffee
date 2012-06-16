@@ -39,7 +39,7 @@ Rogue.ready ->
 				parent: app.game
 				image: app.animation.next()
 				scaleFactor: 2
-				require: ["move","collide"]
+				require: ["move","collide","gravity"]
 
 			#app.player2 = new Rogue.Entity
 			#	parent: app.game
@@ -68,7 +68,7 @@ Rogue.ready ->
 			if app.input.pressed("left")
 				app.player.move(-2,0)
 			if app.input.pressed("up")
-				app.player.move(0,-2)
+				app.player.dy = 5
 			if app.input.pressed("down")
 				app.player.move(0,2)
 

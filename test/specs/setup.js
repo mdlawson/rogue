@@ -41,7 +41,7 @@
           parent: app.game,
           image: app.animation.next(),
           scaleFactor: 2,
-          require: ["move", "collide"]
+          require: ["move", "collide", "gravity"]
         });
         app.tiles = new Rogue.TileMap({
           y: 300,
@@ -66,7 +66,7 @@
       update: function() {
         if (app.input.pressed("right")) app.player.move(2, 0);
         if (app.input.pressed("left")) app.player.move(-2, 0);
-        if (app.input.pressed("up")) app.player.move(0, -2);
+        if (app.input.pressed("up")) app.player.dy = 5;
         if (app.input.pressed("down")) app.player.move(0, 2);
         app.player.image = app.animation.next();
         app.game.clear();
