@@ -3,15 +3,18 @@ class Entity
 		@components=[]
 		@updates=[]
 		util.mixin @, @options
-		if @import then util.import(@import,@)
+		if @require then @import(@require)
 		if @parent then @parent.e.push @
+
+	import: (imports) ->
+		util.import(@, imports) 
 
 	update: ->
 		func.call(@) for func in @updates
 
 c = {}
 
-c.sprite =
+class c.sprite
 	init: ->
 		unless @image then log 2, "Sprite entitys require an image"
 		@width ?= @image.width
@@ -44,9 +47,9 @@ c.sprite =
 		width: @width
 		height: @height
 
-c.move =
+class c.move
 	init: ->
-		util.import(["sprite"],@)
+		@import ["sprite"] 
 
 	move: (x,y) ->
 		@x += x
@@ -54,9 +57,9 @@ c.move =
 
 	moveTo: (@x,@y) ->
 
-c.tile =
+class c.tile
 	init: ->
-		util.import ["sprite"], @
+		@import ["sprite"]
 
 	move: (x,y) ->
 		util.remove @tile.contents, @
@@ -74,9 +77,9 @@ c.tile =
 		width: @width
 		height: @height
 
-c.collide =
+class c.collide
 	init: ->
-		util.import(["sprite"],@)
+		@import ["sprite"]
 		@updates.unshift @colliding
 
 	collide: (obj) ->
@@ -88,6 +91,50 @@ c.collide =
 		results = []
 		results.push obj for obj in solid when @collide(obj)
 		return results
+	move: (x,y) ->
+				@x += x
+				@y += y
+				if @colliding().length > 0
+					@x -= x
+					@y -= y
+
+class c.collidePixel
+	init: ->
+		@import ["sprite"]
+	collide: (obj) ->
+		#if util.collide @rect(), obj.rect()
+
+class c.layer extends c.sprite
+	init: ->
+		@width ?= @image.width
+		@height ?= @image.height
+		@x ?= 0
+		@y ?= 0
+		if @scaleFactor then @scale @scaleFactor
+		@repeatX ?= false
+		@repeatY ?= false
+		@scrollY ?= false
+		@scrollX ?= true
+		@speed ?= 0
+		@updates.push @draw
+	draw: (x=0, y=0)->
+		rect = @parent.rect()
+		unless x > 0 or y > 0
+			if @scrollX then @x = (rect.x - @x)*@speed
+			if @scrollY then @y = (rect.y - @y)*@speed
+		c = @parent.context
+		c.save()
+		if @angle then c.rotate(@angle*Math.PI/180)
+		if @alpha then c.globalAlpha = @alpha
+		c.translate(@x+x,@y+y)
+		c.drawImage(@image, 0, 0, @width, @height)
+		c.restore()
+		if @repeatX and @x+@width+x < rect.x+rect.width
+			@draw(x+@width,0)
+		if @repeatY and @y+@height+y < rect.y+rect.height
+			@draw(0,y+@height)
+
+
 
 
 

@@ -27,6 +27,7 @@ class Game
 		@canvas.tabIndex=1
 		@width = @canvas.width = @options.width ? 400
 		@height = @canvas.height = @options.height ? 300
+		@showFPS = @options.fps ? false
 		@canvas.x = @canvas.y = 0
 		@context = @canvas.getContext('2d')
 
@@ -38,9 +39,7 @@ class Game
 	#	update method, which is run every tick.
 	#
 	# @example
-	# 	myGame.start
-	# 		setup: -> # setup code
-	# 		update: -> # update code
+	# 	myGame.start({setup: -> foo();, update: -> bar()})
 	start: (state) ->
 		loading = @options.loadingScreen ? ->
 		@switchState(state)
@@ -54,7 +53,7 @@ class Game
 		@oldState = @state
 		@state = state
 		@state.setup()
-		@loop = new GameLoop
+		@loop = new GameLoop @context,@showFPS
 		@loop.add @state.update
 		@loop.start()
 
@@ -66,6 +65,7 @@ class Game
 
 	# Finds entities within the scope of the game, given a list of components to match
 	# @param [Array] components array of components a matched object must have
+	#
 	# @example
 	# 	solidEnemies = myGame.find ["enemy","collide"]
 	# @return [Array] An array of {Entity} that have the components
@@ -75,7 +75,7 @@ class Game
 # The GameLoop class. Runs a list of functions, stored in @call, every tick.
 # Is handled internally, but can be used manually if desired.
 class GameLoop
-	constructor: ->
+	constructor: (@ctx,@showFPS) ->
 		@fps = 0
 		@averageFPS = new RollingAverage 20
 		@call = []
@@ -290,23 +290,30 @@ util =
 	collide: (r1,r2) ->
 		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)
 
+	overlap: (r1,r2) ->
+		x = Math.max(r1.x, r2.x) 
+
 	# Mixes in the properties/methods of mixin into obj
 	# @param [Object] obj the target object
 	# @param [Object] mixin the mixin
 	mixin: (obj, mixin)	->
-		obj[name] = method for name, method of mixin        
+		for name, method of mixin
+			if method.slice
+				obj[name] = method.slice(0)
+			else
+				obj[name] = method
 		obj
 
 	# Imports an array of components into an Entity, checking they are not already imported,
 	# and running the init functions of each component
 	# @param [Array] components and array of components to import
 	# @param [Entity] the Entity to import the components to
-	import: (components,obj) ->
+	import: (obj,components) ->
 		for comp in components
 			if comp not in obj.components
 				obj.components.push comp
-				util.mixin obj, c[comp]
-				c[comp].init.apply(obj)
+				util.mixin obj, new c[comp]
+				obj.init()
 				delete obj.init; delete obj.import
 
 find = (c) ->

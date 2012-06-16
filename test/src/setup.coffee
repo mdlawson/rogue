@@ -2,7 +2,8 @@ Rogue.ready ->
 
 	app = {}
 
-	app.game = new Rogue.Game()
+	app.game = new Rogue.Game
+		fps: true
 	app.input = new Rogue.KeyboardManager(app.game.canvas)
 	app.state =
 		setup: ->
@@ -22,36 +23,42 @@ Rogue.ready ->
 				viewWidth: 1000
 				viewHeight: 1000
 
+			app.bg1 = new Rogue.Entity
+				image: app.assets.get 'img/b1.png'
+				speed: 0.99
+				repeatX: true
+				require: ["layer"]
+			app.bg2 = new Rogue.Entity
+				image: app.assets.get 'img/b2.png'
+				speed: 0.5
+				repeatX: true
+				require: ["layer"]
+
+
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: app.animation.next()
 				scaleFactor: 2
-				import: ["move","collide"]
+				require: ["move","collide"]
 
-			app.player.move = (x,y) ->
-				@x += x
-				@y += y
-				if @colliding().length > 0
-					@x -= x
-					@y -= y
-
-			app.player2 = new Rogue.Entity
-				parent: app.game
-				image: app.assets.get 'img/2.png'
-				import: ["move","collide"]
-				x: 64
-				y: 64
+			#app.player2 = new Rogue.Entity
+			#	parent: app.game
+			#	image: app.assets.get 'img/2.png'
+			#	require: ["move","collide"]
+			#	x: 64
+			#	y: 64
 
 			app.tiles = new Rogue.TileMap
-				size: [20,20]
+				y: 300
+				size: [30,1]
 
-			app.viewport.add [app.tiles, app.player, app.player2]
+			app.viewport.add [app.bg2, app.bg1, app.player, app.tiles]
 			app.viewport.updates.unshift ->
-				app.viewport.follow app.player
-				app.viewport.forceInside app.player, false
+				@follow app.player
+				@forceInside app.player, false
 
 			app.blocks = []
-			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: y, import: ["sprite"]})) for x in [0...app.tiles.size[0]] for y in [0...app.tiles.size[1]]
+			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: 0, require: ["sprite","collide"]})) for x in [0...app.tiles.size[0]]
 			
 			app.tiles.place app.blocks
 
@@ -72,7 +79,7 @@ Rogue.ready ->
 			app.viewport.update()
 
 	app.assets = new Rogue.AssetManager()
-	app.assets.add ['img/1.png','img/2.png']
+	app.assets.add ['img/1.png','img/2.png','img/b1.png','img/b2.png']
 	app.assets.loadAll
 		onFinish: -> 
 			console.log "Assets Loaded"

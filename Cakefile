@@ -16,6 +16,7 @@ task 'build', 'Build lib/rogue.js from src/', ->
 task 'watch', 'Watch src/ for changes', ->
   coffee = exec "coffee -j lib/rogue.js -cw #{srcFiles}"
   min = exec "uglifyjs -o lib/rogue.min.js  lib/rogue.js"
+  serv = exec "node test/server"
   coffee.stderr.on 'data', (data) ->
     process.stderr.write data.toString()
   coffee.stdout.on 'data', (data) ->

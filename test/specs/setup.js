@@ -3,11 +3,13 @@
   Rogue.ready(function() {
     var app;
     app = {};
-    app.game = new Rogue.Game();
+    app.game = new Rogue.Game({
+      fps: true
+    });
     app.input = new Rogue.KeyboardManager(app.game.canvas);
     app.state = {
       setup: function() {
-        var x, y, _ref, _ref2;
+        var x, _ref;
         console.log("setup run");
         app.sprites = new Rogue.SpriteSheet({
           image: app.assets.get('img/2.png'),
@@ -23,45 +25,41 @@
           viewWidth: 1000,
           viewHeight: 1000
         });
+        app.bg1 = new Rogue.Entity({
+          image: app.assets.get('img/b1.png'),
+          speed: 0.99,
+          repeatX: true,
+          require: ["layer"]
+        });
+        app.bg2 = new Rogue.Entity({
+          image: app.assets.get('img/b2.png'),
+          speed: 0.5,
+          repeatX: true,
+          require: ["layer"]
+        });
         app.player = new Rogue.Entity({
           parent: app.game,
           image: app.animation.next(),
           scaleFactor: 2,
-          "import": ["move", "collide"]
-        });
-        app.player.move = function(x, y) {
-          this.x += x;
-          this.y += y;
-          if (this.colliding().length > 0) {
-            this.x -= x;
-            return this.y -= y;
-          }
-        };
-        app.player2 = new Rogue.Entity({
-          parent: app.game,
-          image: app.assets.get('img/2.png'),
-          "import": ["move", "collide"],
-          x: 64,
-          y: 64
+          require: ["move", "collide"]
         });
         app.tiles = new Rogue.TileMap({
-          size: [20, 20]
+          y: 300,
+          size: [30, 1]
         });
-        app.viewport.add([app.tiles, app.player, app.player2]);
+        app.viewport.add([app.bg2, app.bg1, app.player, app.tiles]);
         app.viewport.updates.unshift(function() {
-          app.viewport.follow(app.player);
-          return app.viewport.forceInside(app.player, false);
+          this.follow(app.player);
+          return this.forceInside(app.player, false);
         });
         app.blocks = [];
-        for (y = 0, _ref = app.tiles.size[1]; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
-          for (x = 0, _ref2 = app.tiles.size[0]; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
-            app.blocks.push(new Rogue.Entity({
-              image: app.assets.get('img/1.png'),
-              x: x,
-              y: y,
-              "import": ["sprite"]
-            }));
-          }
+        for (x = 0, _ref = app.tiles.size[0]; 0 <= _ref ? x < _ref : x > _ref; 0 <= _ref ? x++ : x--) {
+          app.blocks.push(new Rogue.Entity({
+            image: app.assets.get('img/1.png'),
+            x: x,
+            y: 0,
+            require: ["sprite", "collide"]
+          }));
         }
         return app.tiles.place(app.blocks);
       },
@@ -76,7 +74,7 @@
       }
     };
     app.assets = new Rogue.AssetManager();
-    app.assets.add(['img/1.png', 'img/2.png']);
+    app.assets.add(['img/1.png', 'img/2.png', 'img/b1.png', 'img/b2.png']);
     app.assets.loadAll({
       onFinish: function() {
         console.log("Assets Loaded");
