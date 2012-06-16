@@ -27,7 +27,7 @@
         });
         app.bg1 = new Rogue.Entity({
           image: app.assets.get('img/b1.png'),
-          speed: 0.99,
+          speed: 0.9,
           repeatX: true,
           require: ["layer"]
         });

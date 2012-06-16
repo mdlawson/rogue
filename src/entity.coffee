@@ -21,7 +21,6 @@ class c.sprite
 		@height ?= @image.height
 		@x ?= 0
 		@y ?= 0
-		@res ?= [1,1] 
 		@xOffset ?= math.round(@width/2)
 		@yOffset ?= math.round(@height/2)
 		if @scaleFactor then @scale @scaleFactor
@@ -29,7 +28,7 @@ class c.sprite
 	draw: ->
 		c = @parent.context
 		c.save()
-		c.translate((@x*@res[0])-@xOffset, (@y*@res[1])-@yOffset)
+		c.translate(@x-@xOffset, @y-@yOffset)
 		if @angle then c.rotate(@angle*Math.PI/180)
 		if @alpha then c.globalAlpha = @alpha
 		c.drawImage(@image, 0, 0, @width, @height)
@@ -120,8 +119,8 @@ class c.layer extends c.sprite
 	draw: (x=0, y=0)->
 		rect = @parent.rect()
 		unless x > 0 or y > 0
-			if @scrollX then @x = (rect.x - @x)*@speed
-			if @scrollY then @y = (rect.y - @y)*@speed
+			if @scrollX then @x = (rect.x - @x)*@speed | 0
+			if @scrollY then @y = (rect.y - @y)*@speed | 0
 		c = @parent.context
 		c.save()
 		if @angle then c.rotate(@angle*Math.PI/180)

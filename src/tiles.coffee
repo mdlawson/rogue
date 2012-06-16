@@ -23,11 +23,13 @@ class TileMap extends Entity
 		if obj.forEach
 			obj.forEach (item) => @place item
 		else
+			@parent.e.push(obj)
 			util.import(["tile"],obj)
 			obj.tile = @tiles[obj.x][obj.y]
-			obj.res = @res
 			obj.parent = @parent
 			@tiles[obj.x][obj.y].content.unshift(obj)
+			obj.x = obj.x*@res[0]+@x
+			obj.y = obj.y*@res[1]+@y
 
 	lookup: (x,y) ->
 		return @tiles[x][y].content
@@ -56,6 +58,5 @@ class TileMap extends Entity
 		for tile in tiles
 			for obj in tile
 				obj.draw()
-
 	rect: -> @
 
