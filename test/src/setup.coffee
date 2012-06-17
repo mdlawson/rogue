@@ -27,13 +27,11 @@ Rogue.ready ->
 				image: app.assets.get 'img/b1.png'
 				speed: 0.5
 				repeatX: true
-				#scrollX: false
 				require: ["layer"]
 			app.bg2 = new Rogue.Entity
 				image: app.assets.get 'img/b2.png'
 				speed: 0.9
 				repeatX: true
-				#scrollX: false
 				require: ["layer"]
 
 
