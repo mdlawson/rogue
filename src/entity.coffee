@@ -17,35 +17,36 @@ c = {}
 class c.sprite
 	init: ->
 		unless @image then log 2, "Sprite entitys require an image"
-		@width ?= @image.width
-		@height ?= @image.height
 		@x ?= 0
-		@y ?= 0
-		@xOffset ?= math.round(@width/2)
-		@yOffset ?= math.round(@height/2)
-		if @scaleFactor then @scale @scaleFactor
+		@y ?= 0	
+		if @scaleFactor? then @scale @scaleFactor, @pixel else @_recalculateImage()
 		@updates[99] = @draw
 	draw: ->
 		c = @parent.context
 		r = math.round
 		c.save()
 		c.translate(r(@x-@xOffset), r(@y-@yOffset))
+		if util.isArray f=@scaleFactor then c.scale(f[0],f[1])
 		if @angle then c.rotate(@angle*Math.PI/180)
 		if @alpha then c.globalAlpha = @alpha
 		c.drawImage(@image, 0, 0, @width, @height)
 		c.restore()
-	scale: (factor) ->
-		@image = gfx.scale @image,factor
-		@width = @image.width
-		@height = @image.height
-		@xOffset = math.round(@width/2)
-		@yOffset = math.round(@height/2)
+	scale: (factor, pixel) ->
+		if pixel then @image = gfx.scale @image,factor else
+			@scaleFactor = factor
+		@_recalculateImage()
 
 	rect: ->
 		x: @x-@xOffset
 		y: @y-@yOffset
 		width: @width
 		height: @height
+
+	_recalculateImage: ->
+		@width ?= @image.width * (@scaleFactor?[0]? or 1)
+		@height ?= @image.height * (@scaleFactor?[1]? or 1)
+		@xOffset = math.round(@width/2)
+		@yOffset = math.round(@height/2)
 
 class c.move
 	init: ->

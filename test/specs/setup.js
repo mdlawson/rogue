@@ -39,7 +39,7 @@
         });
         app.player = new Rogue.Entity({
           parent: app.game,
-          image: app.animation.next(),
+          image: app.assets.get('img/2.png'),
           scaleFactor: 2,
           require: ["move", "collide", "gravity"]
         });
@@ -68,7 +68,6 @@
         if (app.input.pressed("left")) app.player.move(-2, 0);
         if (app.input.pressed("up")) app.player.dy = 5;
         if (app.input.pressed("down")) app.player.move(0, 2);
-        app.player.image = app.animation.next();
         app.game.clear();
         return app.viewport.update();
       }

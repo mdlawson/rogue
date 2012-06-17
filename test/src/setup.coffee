@@ -37,7 +37,7 @@ Rogue.ready ->
 
 			app.player = new Rogue.Entity
 				parent: app.game
-				image: app.animation.next()
+				image: app.assets.get 'img/2.png'
 				scaleFactor: 2
 				require: ["move","collide","gravity"]
 
@@ -72,7 +72,7 @@ Rogue.ready ->
 			if app.input.pressed("down")
 				app.player.move(0,2)
 
-			app.player.image = app.animation.next()
+			#app.player.image = app.animation.next()
 
 			app.game.clear()
 
