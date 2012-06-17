@@ -25,13 +25,15 @@ Rogue.ready ->
 
 			app.bg1 = new Rogue.Entity
 				image: app.assets.get 'img/b1.png'
-				speed: 0.9
+				speed: 0.5
 				repeatX: true
+				#scrollX: false
 				require: ["layer"]
 			app.bg2 = new Rogue.Entity
 				image: app.assets.get 'img/b2.png'
-				speed: 0.5
+				speed: 0.9
 				repeatX: true
+				#scrollX: false
 				require: ["layer"]
 
 
@@ -53,7 +55,7 @@ Rogue.ready ->
 				size: [30,1]
 
 			app.viewport.add [app.bg2, app.bg1, app.player, app.tiles]
-			app.viewport.updates.unshift ->
+			app.viewport.updates[98] = ->
 				@follow app.player
 				@forceInside app.player, false
 

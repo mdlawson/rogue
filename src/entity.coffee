@@ -84,9 +84,11 @@ class c.tile
 class c.collide
 	init: ->
 		@import ["sprite"]
-		@updates[98] = @colliding
+		#@updates[98] = @colliding
 
 	collide: (obj) ->
+		if obj.forEach
+			obj.forEach (o) => @collide o
 		util.collide @rect(), obj.rect()
 
 	colliding: ->
@@ -98,9 +100,9 @@ class c.collide
 	move: (x,y) ->
 		@x += x
 		@y += y
-		if @colliding().length > 0
-			@x -= x
-			@y -= y
+		while @colliding().length > 0
+			if x isnt 0 then (if x > 0 then @x-- else @x++)
+			if y isnt 0 then (if y > 0 then @y-- else @y++)
 
 class c.collidePixel
 	init: ->
@@ -125,8 +127,8 @@ class c.layer extends c.sprite
 		rect = @parent.rect()
 		r = math.round
 		unless x > 0 or y > 0
-			if @scrollX then @x = (rect.x - @x)*@speed | 0
-			if @scrollY then @y = (rect.y - @y)*@speed | 0
+			if @scrollX then @x = (rect.x)*@speed | 0
+			if @scrollY then @y = (rect.y)*@speed | 0
 		c = @parent.context
 		c.save()
 		if @angle then c.rotate(@angle*Math.PI/180)

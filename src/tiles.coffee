@@ -9,7 +9,7 @@ class TileMap extends Entity
 		@parent = options.parent
 		@components = []
 		@tiles = ({parent: @} for x in [0...@size[1]] for y in [0...@size[0]])
-		@updates =[@draw]
+		@updates = {99:@draw}
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
 		for y in [0...@size[1]]
 			for x in [0...@size[0]]

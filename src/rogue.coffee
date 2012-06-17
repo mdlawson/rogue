@@ -157,7 +157,7 @@ class ViewPort extends Entity
 		@x = @options.x or 0
 		@y = @options.y or 0
 		@e = []
-		@updates = [@draw]
+		@updates = {99:@draw}
 	# adds an {Entity} to the viewport, updates its parent automatically. 
 	# The {Entity} will now be updated with the viewport, and drawn relative to the viewport
 	# @param [Entity] entity the {Entity} to add

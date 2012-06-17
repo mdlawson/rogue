@@ -27,13 +27,13 @@
         });
         app.bg1 = new Rogue.Entity({
           image: app.assets.get('img/b1.png'),
-          speed: 0.9,
+          speed: 0.5,
           repeatX: true,
           require: ["layer"]
         });
         app.bg2 = new Rogue.Entity({
           image: app.assets.get('img/b2.png'),
-          speed: 0.5,
+          speed: 0.9,
           repeatX: true,
           require: ["layer"]
         });
@@ -48,10 +48,10 @@
           size: [30, 1]
         });
         app.viewport.add([app.bg2, app.bg1, app.player, app.tiles]);
-        app.viewport.updates.unshift(function() {
+        app.viewport.updates[98] = function() {
           this.follow(app.player);
           return this.forceInside(app.player, false);
-        });
+        };
         app.blocks = [];
         for (x = 0, _ref = app.tiles.size[0]; 0 <= _ref ? x < _ref : x > _ref; 0 <= _ref ? x++ : x--) {
           app.blocks.push(new Rogue.Entity({
