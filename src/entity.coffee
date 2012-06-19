@@ -1,7 +1,7 @@
 class Entity
 	constructor: (@options) ->
 		@components=[]
-		@updates={}
+		@updates=[]
 		util.mixin @, @options
 		if @require then @import(@require)
 		if @parent then @parent.e.push @
@@ -10,7 +10,7 @@ class Entity
 		util.import(@, imports) 
 
 	update: ->
-		func.call(@) for key,func of @updates
+		func.call(@) for func in @updates when func?
 
 c = {}
 
