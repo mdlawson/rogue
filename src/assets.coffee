@@ -67,6 +67,8 @@ class SpriteSheet
 				cx.drawImage(@img,x,y,c.width,c.height,0,0,c.width,c.height)
 				this[@length] = c
 				@length++
+	slice: (start, end) ->
+		return Array::slice.call(this, start, end);
 
 class Animation
 	constructor: (@options) ->
