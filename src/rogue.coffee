@@ -360,5 +360,6 @@ Rogue.ViewPort        = ViewPort
 Rogue.components      = c
 Rogue.Entity          = Entity
 Rogue.KeyboardManager = KeyboardManager
+Rogue.Mouse           = Mouse
 
 Rogue.loglevel = 4

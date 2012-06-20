@@ -7,6 +7,7 @@
       fps: true
     });
     app.input = new Rogue.KeyboardManager(app.game.canvas);
+    app.mouse = new Rogue.Mouse(app.game.canvas);
     app.state = {
       setup: function() {
         var x, _ref;

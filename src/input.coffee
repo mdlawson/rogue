@@ -1,17 +1,17 @@
 class KeyboardManager
 	constructor: (@context) ->
-		@context.oncontextmenu = -> return false
 
 		handleEvent = (e) =>
 			e = e or window.event
-			return unless e.target is @context
+			#return unless e.target is @context
 			if e.type is 'keyup' then key = false; fn = upFn else key = true; fn = downFn
 			pressedKeys[e.keyCode] = key
 			if e.keyCode in fn then fn[e.keyCode]()
 			e.preventDefault()
 
-		window.addEventListener('keyup', handleEvent,false)
-		window.addEventListener('keydown', handleEvent,false)
+		@context.onkeydown = @context.onkeyup = handleEvent
+		#window.addEventListener('keyup', handleEvent,false)
+		#window.addEventListener('keydown', handleEvent,false)
 
 	press: (key, fn) ->
 		if key.forEach
@@ -78,3 +78,12 @@ class KeyboardManager
 	}
 	for num in [0...10] then keys[''+num]=48+num; keys['numpad'+num]=96+num; keys['f'+num]=112+num 
 	keys[char] = 65+i for char,i in 'abcdefghijklmnopqrstuvwxyz'
+
+class Mouse
+	constructor: (@context) ->
+		@context.oncontextmenu = -> false
+		mousemove = (e) =>
+			@x = e.offsetX
+			@y = e.offsetX
+		@context.onmousemove = mousemove
+
