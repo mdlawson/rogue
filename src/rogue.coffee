@@ -145,9 +145,9 @@ class ViewPort extends Entity
 	# @option options [Integer] x the x position of the viewport relative to the parent
 	# @option options [Integer] y the y position of the viewport relative to the parent
 	constructor: (@options) ->
-		@canvas = @options.canvas or util.canvas()
-		@context = @canvas.getContext('2d')
 		@parent = @options.parent
+		@canvas = @options.canvas or @parent.canvas or util.canvas()
+		@context = @canvas.getContext('2d')
 		@width = @options.width or @canvas.width
 		@height = @options.height or @canvas.height
 		@viewWidth = @options.viewWidth or @width
@@ -289,8 +289,18 @@ util =
 	# @param [Object] r2 2ns object
 	# @return [Boolean] Returns true if the two object collide
 	collide: (r1,r2) ->
-		not (r2.x >= r1.x+r1.width or r2.x+r2.width <= r1.x or r2.y >= r1.y+r1.height or r2.y+r2.height <= r1.y)
-
+		w = (r1.width+r2.width)/2
+		h = (r1.height+r2.height)/2
+		dx = (r1.x+r1.width/2)-(r2.x+r2.width/2)
+		dy = (r1.y+r1.height/2)-(r2.y+r2.height/2)
+		if Math.abs(dx) <= w-1 and Math.abs(dy) <= h-1
+			wy = w*dy
+			hx = h*dx
+			if wy > hx
+				if wy > -hx then return "top" else return "left"
+			else
+				if wy > -hx then return "right" else return "bottom"
+		return false
 	overlap: (r1,r2) ->
 		x = Math.max(r1.x, r2.x) 
 

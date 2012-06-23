@@ -22,7 +22,6 @@
         });
         app.viewport = new Rogue.ViewPort({
           parent: app.game,
-          canvas: app.game.canvas,
           viewWidth: 1000,
           viewHeight: 1000
         });
@@ -67,7 +66,13 @@
       update: function() {
         if (app.input.pressed("right")) app.player.move(2, 0);
         if (app.input.pressed("left")) app.player.move(-2, 0);
-        if (app.input.pressed("up")) app.player.dy = 5;
+        if (app.input.pressed("up")) {
+          if (app.player.colliding.some(function(c) {
+            return c.dir === "bottom";
+          })) {
+            app.player.dy = 20;
+          }
+        }
         if (app.input.pressed("down")) app.player.move(0, 2);
         app.game.clear();
         return app.viewport.update();

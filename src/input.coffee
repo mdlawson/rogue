@@ -86,4 +86,4 @@ class Mouse
 			@x = e.offsetX
 			@y = e.offsetX
 		@context.onmousemove = mousemove
-
+	click: (fn) ->

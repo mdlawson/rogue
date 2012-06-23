@@ -20,7 +20,6 @@ Rogue.ready ->
 
 			app.viewport = new Rogue.ViewPort
 				parent: app.game
-				canvas: app.game.canvas
 				viewWidth: 1000
 				viewHeight: 1000
 
@@ -69,7 +68,8 @@ Rogue.ready ->
 			if app.input.pressed("left")
 				app.player.move(-2,0)
 			if app.input.pressed("up")
-				app.player.dy = 5
+				if app.player.colliding.some((c) -> c.dir is "bottom")
+					app.player.dy = 20
 			if app.input.pressed("down")
 				app.player.move(0,2)
 

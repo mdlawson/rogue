@@ -53,7 +53,7 @@ class c.move
 		@import ["sprite"]
 		@dy ?= 0
 		@dx ?= 0
-		@updates[97] = ->
+		@updates[98] = ->
 			@move math.round(@dx),math.round(-@dy)
 
 	move: (x,y) ->
@@ -85,25 +85,37 @@ class c.tile
 class c.collide
 	init: ->
 		@import ["sprite"]
-		#@updates[98] = @colliding
+		@updates[97] = @_colliding
 
 	collide: (obj) ->
 		if obj.forEach
 			obj.forEach (o) => @collide o
-		util.collide @rect(), obj.rect()
+		if obj in @colliding then true else false
 
-	colliding: ->
+	findCollisions: ->
 		solid = @parent.find(["collide"])
 		util.remove solid, @
 		results = []
-		results.push obj for obj in solid when @collide(obj)
-		return results
+		for obj in solid
+			dir = util.collide(@rect(),obj.rect())
+			if dir
+				results.push
+					dir: dir
+					entity: obj 
+		@colliding = results
 	move: (x,y) ->
+		if Math.abs(x) < 1 and Math.abs(y) < 1
+				return false
 		@x += x
 		@y += y
-		while @colliding().length > 0
-			if x isnt 0 then (if x > 0 then @x-- else @x++)
-			if y isnt 0 then (if y > 0 then @y-- else @y++)
+		if @findCollisions().length > 0
+			@x -= x
+			@y -= y
+			if @move(~~(x/2), ~~(y/2))
+				if not @move(~~(x/2), ~~(y/2)) then return false else
+					return true
+			else return false
+		else return true
 
 class c.collidePixel
 	init: ->
@@ -117,6 +129,7 @@ class c.layer extends c.sprite
 		@height ?= @image.height
 		@x ?= 0
 		@y ?= 0
+		@xOffset = @yOffset = 0
 		if @scaleFactor then @scale @scaleFactor
 		@repeatX ?= false
 		@repeatY ?= false
@@ -128,8 +141,8 @@ class c.layer extends c.sprite
 		rect = @parent.rect()
 		r = math.round
 		unless x > 0 or y > 0
-			if @scrollX then @x = (rect.x)*@speed | 0
-			if @scrollY then @y = (rect.y)*@speed | 0
+			if @scrollX then @x = math.round(rect.x*@speed)
+			if @scrollY then @y = math.round(rect.y*@speed)
 		c = @parent.context
 		c.save()
 		if @angle then c.rotate(@angle*Math.PI/180)
