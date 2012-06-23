@@ -85,7 +85,7 @@ class c.tile
 class c.collide
 	init: ->
 		@import ["sprite"]
-		@updates[97] = @_colliding
+		#@updates[97] = @findCollisions
 
 	collide: (obj) ->
 		if obj.forEach
@@ -99,9 +99,12 @@ class c.collide
 		for obj in solid
 			dir = util.collide(@rect(),obj.rect())
 			if dir
-				results.push
+				col = 
 					dir: dir
-					entity: obj 
+					entity: obj
+				if @onHit? then @onHit col
+				results.push col
+					
 		@colliding = results
 	move: (x,y) ->
 		if Math.abs(x) < 1 and Math.abs(y) < 1

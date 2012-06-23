@@ -41,7 +41,10 @@
           parent: app.game,
           image: app.assets.get('img/2.png'),
           scaleFactor: 2,
-          require: ["move", "collide", "gravity"]
+          require: ["move", "collide", "gravity"],
+          onHit: function(col) {
+            if (col.dir === "bottom") return this.canJump = true;
+          }
         });
         app.tiles = new Rogue.TileMap({
           y: 300,
@@ -67,9 +70,8 @@
         if (app.input.pressed("right")) app.player.move(2, 0);
         if (app.input.pressed("left")) app.player.move(-2, 0);
         if (app.input.pressed("up")) {
-          if (app.player.colliding.some(function(c) {
-            return c.dir === "bottom";
-          })) {
+          if (app.player.canJump) {
+            app.player.canJump = false;
             app.player.dy = 20;
           }
         }

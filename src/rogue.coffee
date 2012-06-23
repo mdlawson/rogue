@@ -301,8 +301,6 @@ util =
 			else
 				if wy > -hx then return "right" else return "bottom"
 		return false
-	overlap: (r1,r2) ->
-		x = Math.max(r1.x, r2.x) 
 
 	# Mixes in the properties/methods of mixin into obj
 	# @param [Object] obj the target object
