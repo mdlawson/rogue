@@ -92,6 +92,7 @@ class GameLoop
 			func() for func in @call
 		unless @stopped
 			Rogue.ticker.call window, @loop
+		if @showFPS then @ctx.fillText(@fps,10,10)
 		@lastTick = @currentTick
 	# Pauses the game loop, loop still runs, but no functions are called
 	pause: -> 
@@ -348,7 +349,8 @@ Rogue.ticker = window.requestAnimationFrame or
 							 window.webkitRequestAnimationFrame or 
 							 window.mozRequestAnimationFrame or
 							 window.oRequestAnimationFrame or
-							 window.msRequestAnimationFrame
+							 window.msRequestAnimationFrame or
+							 (tick) -> window.setTimeout(tick, 1000/60)
 
 Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
 	document.removeEventListener "DOMContentLoaded", arguments.callee, false

@@ -26,15 +26,15 @@ class c.sprite
 		r = math.round
 		c.save()
 		c.translate(r(@x-@xOffset), r(@y-@yOffset))
-		if util.isArray f=@scaleFactor then c.scale(f[0],f[1])
 		if @angle then c.rotate(@angle*Math.PI/180)
 		if @alpha then c.globalAlpha = @alpha
 		c.drawImage(@image, 0, 0, @width, @height)
 		c.restore()
-	scale: (factor, pixel) ->
-		if pixel then @image = gfx.scale @image,factor else
-			@scaleFactor = factor
+	scale: (@scaleFactor, @pixel) ->
+		@y-=@height*@scaleFactor[1]/2
+		@image = gfx.scale @image,@scaleFactor,@pixel
 		@_recalculateImage()
+
 
 	rect: ->
 		x: @x-@xOffset
@@ -43,8 +43,8 @@ class c.sprite
 		height: @height
 
 	_recalculateImage: ->
-		@width ?= @image.width * (@scaleFactor?[0]? or 1)
-		@height ?= @image.height * (@scaleFactor?[1]? or 1)
+		@width = @image.width
+		@height = @image.height
 		@xOffset = math.round(@width/2)
 		@yOffset = math.round(@height/2)
 

@@ -1,21 +1,19 @@
 gfx = {}
 
-gfx.scale = (img,s) ->
-	ctx = img.getContext('2d')
-	if ctx.mozImageSmoothingEnabled
-		ctx.mozImageSmoothingEnabled = false # hack for ff
-	else # hack for chrome
-		ctx.scale(s,s)
-		ctx.fillStyle = ctx.createPattern(img, 'repeat')
-		ctx.fillRect(0,0,img.width,img.height)
-	img.width*=s
-	img.height*=s
-	return img
-
-	#data = img.getContext('2d').getImageData(0,0,img.width,img.height).data
-	#for x in [0...img.width]
-	#	for y in [0...img.height]
-	#		i = (y*img.width+x)*4
-	#		context.fillStyle = "rgba(#{data[i]},#{data[i++]},#{data[i++]},#{(data[i++]/255)})"
-	#		context.fillRect(x*s,y*s,s,s)
-	#return canvas
+gfx.scale = (simg,s,pixel) ->
+	dimg = util.canvas()
+	dimg.width = simg.width*s[0]
+	dimg.height = simg.height*s[1]
+	ctx = dimg.getContext("2d")
+	ctx.scale(s[0],s[1])
+	if pixel
+		if ctx.mozImageSmoothingEnabled?
+			ctx.mozImageSmoothingEnabled = false
+			ctx.imageSmoothingEnabled = false 
+			ctx.drawImage(simg,0,0,simg.width,simg.height)
+		else
+			ctx.fillStyle = ctx.createPattern(simg, 'repeat')
+			ctx.fillRect(0,0,simg.width,simg.height)
+	else
+		ctx.drawImage(simg,0,0,simg.width,simg.height)
+	return dimg

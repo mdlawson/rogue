@@ -38,7 +38,6 @@ Rogue.ready ->
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: app.assets.get 'img/2.png'
-				scaleFactor: 2
 				require: ["move","collide","gravity"]
 				onHit: (col) -> if col.dir is "bottom" then @canJump = true 
 			#app.player2 = new Rogue.Entity
