@@ -1,7 +1,7 @@
 {print} = require 'util'
 {exec} = require 'child_process'
 
-srcFiles = ("src/#{file}.coffee" for file in ['gfx', 'assets', 'entity', 'tiles', 'input', 'rogue']).join " "
+srcFiles = ("src/#{file}.coffee" for file in ['gfx', 'assets', 'entity', 'tiles', 'input', 'collision', 'rogue']).join " "
 
 task 'build', 'Build lib/rogue.js from src/', ->
   coffee = exec "coffee -j lib/rogue.js -c #{srcFiles}"

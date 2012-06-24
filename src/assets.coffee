@@ -3,7 +3,8 @@ class AssetManager
 		@count = 0
 		@ecount = 0
 		@queue = []
-		@assets = {}
+		@image = {}
+		@sound = {}
 		@filetypes =
 			image: ["png","gif","jpg","jpeg","tiff"]
 			sound: ["mp3","ogg"]
@@ -12,8 +13,8 @@ class AssetManager
 		@queue = @queue.concat url
 
 	get: (src) ->
-		if not @assets[src]? then Rogue.log 2,"asset not loaded: #{src}"
-		@assets[src]
+		if not this[src]? then Rogue.log 2,"asset not loaded: #{src}"
+		this[src]
 
 	loadAll: (options) ->
 		@onFinish = options.onFinish
@@ -32,8 +33,9 @@ class AssetManager
 		switch type
 			when "image"
 				asset = new Image()
-				asset.addEventListener "load", ->
+				asset.onload = ->
 					canvas = util.canvas()
+					canvas.type = type
 					canvas.width = @width
 					canvas.height = @height
 					canvas.src = src
@@ -41,14 +43,30 @@ class AssetManager
 					context.drawImage @, 0, 0, @width, @height
 					that.count++
 					that.loaded canvas
-				asset.addEventListener "error", ->
-					that.ecount++
-					Rogue.log 2,"could not load asset: #{@src}"
-					that.loaded @
+				asset.onerror = -> that.onerror(@)
+					
 				asset.src = src
+			when "sound"
+				asset = new Audio(src)
+				asset.type = type
+				switch ext
+					when 'mp3' then codec = 'audio/mpeg'
+					when 'ogg' then codec = 'audio/ogg'
+				unless asset.canPlayType(codec) then return
+				asset.oncanplaythrough = ->
+					that.count++
+					that.loaded @
+				asset.onerror = -> that.onerror(@)
+				asset.load()
+
+	onerror: (asset) ->
+		@ecount++
+		Rogue.log 2,"could not load asset: #{asset.src}"
+		@loaded asset
 
 	loaded: (asset) ->
-		@assets[asset.src] = asset
+		this[asset.type][asset.src.split(".")[0]] = asset
+		this[asset.src] = asset
 		percentage = ((@count+@ecount)/@queue.length)*100
 		@onLoad(percentage)
 		if percentage is 100 then @onFinish()

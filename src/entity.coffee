@@ -97,7 +97,7 @@ class c.collide
 		util.remove solid, @
 		results = []
 		for obj in solid
-			dir = util.collide(@rect(),obj.rect())
+			dir = collision.AABB(@rect(),obj.rect())
 			if dir
 				col = 
 					dir: dir
@@ -122,7 +122,8 @@ class c.collide
 
 class c.collidePixel
 	init: ->
-		@import ["sprite"]
+		@hitmap = collision.createHitmap @
+		@import ["collide"]
 	collide: (obj) ->
 		#if util.collide @rect(), obj.rect()
 

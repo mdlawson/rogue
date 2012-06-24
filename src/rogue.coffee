@@ -235,7 +235,7 @@ class ViewPort extends Entity
 	# @param [Entity] entity the entity to check
 	# @return [Boolean] returns true if the object is visible
 	visible: (entity) ->
-		util.collide entity.rect(), @rect()
+		collision.AABB entity.rect(), @rect()
 
 	# keeps the viewport within the bounds of the viewable area
 	keepInBounds: ->
@@ -284,24 +284,6 @@ util =
 	# @param [*] val value to remove
 	remove: (a,val) ->
 		a.splice a.indexOf(val), 1
-
-	# Checks if two rectangular objects (with x, y, width and height parameters) collide
-	# @param [Object] r1 1st object
-	# @param [Object] r2 2ns object
-	# @return [Boolean] Returns true if the two object collide
-	collide: (r1,r2) ->
-		w = (r1.width+r2.width)/2
-		h = (r1.height+r2.height)/2
-		dx = (r1.x+r1.width/2)-(r2.x+r2.width/2)
-		dy = (r1.y+r1.height/2)-(r2.y+r2.height/2)
-		if Math.abs(dx) <= w-1 and Math.abs(dy) <= h-1
-			wy = w*dy
-			hx = h*dx
-			if wy > hx
-				if wy > -hx then return "top" else return "left"
-			else
-				if wy > -hx then return "right" else return "bottom"
-		return false
 
 	# Mixes in the properties/methods of mixin into obj
 	# @param [Object] obj the target object
@@ -365,6 +347,7 @@ Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
 Rogue.SpriteSheet     = SpriteSheet
 Rogue.gfx             = gfx
+Rogue.collision       = collision
 Rogue.Animation       = Animation
 Rogue.ViewPort        = ViewPort
 Rogue.components      = c

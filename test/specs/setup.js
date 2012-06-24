@@ -23,7 +23,7 @@
         app.viewport = new Rogue.ViewPort({
           parent: app.game,
           viewWidth: 1000,
-          viewHeight: 1000
+          viewHeight: 400
         });
         app.bg1 = new Rogue.Entity({
           image: app.assets.get('img/b1.png'),
@@ -71,7 +71,7 @@
         if (app.input.pressed("up")) {
           if (app.player.canJump) {
             app.player.canJump = false;
-            app.player.dy = 20;
+            app.player.dy = 17;
           }
         }
         if (app.input.pressed("down")) app.player.move(0, 2);
