@@ -17,6 +17,13 @@ Rogue - A canvas games library written in CoffeeScript
 	* ViewPort
 	* Animation
 	* KeyboardManager
+    * Entity
+
+* Components:
+	* Gravity
+    * Collisions
+    * Movement
+    * Sprite
 
 ## Credits
 
