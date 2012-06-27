@@ -9,6 +9,8 @@ Rogue.ready ->
 	app.state =
 		setup: ->
 			console.log "setup run"
+			app.sounds = new Rogue.SoundBox(app.assets.sound)
+			app.sounds.func("jump","sound/jump")
 
 			app.sprites = new Rogue.SpriteSheet
 				image: app.assets.get 'img/2.png'
@@ -68,6 +70,7 @@ Rogue.ready ->
 				app.player.move(-2,0)
 			if app.input.pressed("up")
 				if app.player.canJump
+					app.sounds.jump()
 					app.player.canJump = false
 					app.player.dy = 17
 			if app.input.pressed("down")
@@ -80,7 +83,7 @@ Rogue.ready ->
 			app.viewport.update()
 
 	app.assets = new Rogue.AssetManager()
-	app.assets.add ['img/1.png','img/2.png','img/b1.png','img/b2.png']
+	app.assets.add ['img/1.png','img/2.png','img/b1.png','img/b2.png', 'sound/jump.ogg', 'sound/jump.mp3']
 	app.assets.loadAll
 		onFinish: -> 
 			console.log "Assets Loaded"

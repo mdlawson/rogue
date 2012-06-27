@@ -346,6 +346,7 @@ Rogue.GameLoop        = GameLoop
 Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
 Rogue.SpriteSheet     = SpriteSheet
+Rogue.SoundBox        = SoundBox
 Rogue.gfx             = gfx
 Rogue.collision       = collision
 Rogue.Animation       = Animation

@@ -49,13 +49,16 @@ class AssetManager
 			when "sound"
 				asset = new Audio(src)
 				asset.type = type
+				asset.name = src
 				switch ext
 					when 'mp3' then codec = 'audio/mpeg'
 					when 'ogg' then codec = 'audio/ogg'
-				unless asset.canPlayType(codec) then return
-				asset.oncanplaythrough = ->
+				unless asset.canPlayType(codec) then @loaded asset
+				cb = ->
+					@removeEventListener "canplaythrough", cb
 					that.count++
 					that.loaded @
+				asset.addEventListener "canplaythrough", cb
 				asset.onerror = -> that.onerror(@)
 				asset.load()
 
@@ -65,11 +68,27 @@ class AssetManager
 		@loaded asset
 
 	loaded: (asset) ->
-		this[asset.type][asset.src.split(".")[0]] = asset
-		this[asset.src] = asset
+		console.log "loaded:", asset
+		name = asset.name or asset.src
+		this[asset.type][name.split(".")[0]] = asset
+		this[name] = asset
 		percentage = ((@count+@ecount)/@queue.length)*100
-		@onLoad(percentage)
+		@onLoad(math.round percentage)
 		if percentage is 100 then @onFinish()
+
+class SoundBox
+	constructor: (@sounds, map) ->
+
+	play: (sound) ->
+		if @sounds[sound]? then @sounds[sound].play()
+	pause: (sound) ->
+		if @sounds[sound]? then @sounds[sound].pause()
+	stop: (sound) ->
+		if @sounds[sound]? then @sounds[sound].stop()
+	func: (name,asset) ->
+		if @sounds[asset]? then this[name] = -> @play(asset) 
+		else "no such sound!"
+
 
 class SpriteSheet
 	constructor: (@options) ->
