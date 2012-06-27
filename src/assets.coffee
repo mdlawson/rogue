@@ -68,14 +68,13 @@ class AssetManager
 		@loaded asset
 
 	loaded: (asset) ->
-		console.log "loaded:", asset
 		name = asset.name or asset.src
 		this[asset.type][name.split(".")[0]] = asset
 		this[name] = asset
 		percentage = ((@count+@ecount)/@queue.length)*100
 		@onLoad(math.round percentage)
 		if percentage is 100 then @onFinish()
-
+		
 class SoundBox
 	constructor: (@sounds, map) ->
 
