@@ -38,7 +38,7 @@
           image: app.assets.get('img/b2.png'),
           speed: 0.9,
           repeatX: true,
-          require: ["layer"]
+          require: ["layer", "collide", "hitmap"]
         });
         app.player = new Rogue.Entity({
           parent: app.game,
@@ -78,11 +78,9 @@
           app.player.move(-2, 0);
         }
         if (app.input.pressed("up")) {
-          if (app.player.canJump) {
-            app.sounds.jump();
-            app.player.canJump = false;
-            app.player.dy = 17;
-          }
+          app.sounds.jump();
+          app.player.canJump = false;
+          app.player.dy = 17;
         }
         if (app.input.pressed("down")) {
           app.player.move(0, 2);

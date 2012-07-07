@@ -17,33 +17,18 @@ collision =
 
 	AABBhitmap: (r,e) ->
 		unless collision.AABB r, e.rect() then return false
-		for dir in e.hitmap
-			for p in dir
-				if @hitTest [e.x+p[0],e.y+p[1]],r
-					return true
+		for dir,points of e.hitmap
+			for p in points
+				dir = @hitTest [e.x+p[0],e.y+p[1]],r
+				if dir then return dir
 		return false
 
-	createHitmap: (img,res=[2,2]) ->
-		ctx = img.getContext('2d')
-		data = ctx.getImageData(0,0,img.width,img.height)
-		pix = data.data
-		y = 0
-		points = []
-		hitmap = [[],[],[],[]]
-		while y <= img.height
-			x = 0
-			offset = img.width*y
-			while x <= img.width
-				index = (offset+x)*4
-				if pix[index+3] isnt 0
-					points.push([x,y])
-				x+=res[0]
-			y+=res[1]
-		for point in points
-			if point[0] >= math.round(img.width/2) then hitmap[1].push(point) else hitmap[3].push(point)
-			if point[1] >= math.round(img.height/2) then hitmap[2].push(point) else hitmap[0].push(point)
+	createHitmap: (img,res=2) ->
+		points = gfx.edgeDetect(img,res)
+		hitmap = {left:[],right:[],up:[],down:[]}
+		for point in points by res
+			hitmap[point[2]].push [point[0],point[1]]
 		return hitmap
-	type: {}
 
 class c.AABB
 	type: "AABB"
@@ -57,6 +42,7 @@ class c.hitmap
 	type: "hitmap"
 	init: ->
 		@_recalculateImage()
+
 	_recalculateImage: ->
 		@width = @image.width
 		@height = @image.height
@@ -67,11 +53,11 @@ class c.hitmap
 		if obj.forEach
 			obj.forEach (o) => @collide o
 		unless collision.AABB @rect(), obj.rect() then return false
-		if obj.type is @type and collision
-			for dir in obj.hitmap
-				for opoint in dir
-					for dir2 in @hitmap
-						for point in dir2
+		if obj.type is @type
+			for dir,points of obj.hitmap
+				for opoint in points
+					for dir2,points2 in @hitmap
+						for point in points2
 							if opoint[0]+obj.x is point[0]+@x and opoint[1]+obj.y is point[1]+@y then return true	
 			return false
 		else if obj.type is "AABB" then return collision.AABBhitmap obj.rect(),@
