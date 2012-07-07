@@ -40,7 +40,7 @@ Rogue.ready ->
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: app.assets.get 'img/2.png'
-				require: ["move","collide","gravity"]
+				require: ["move","collide","AABB","gravity"]
 				onHit: (col) -> if col.dir is "bottom" then @canJump = true 
 			#app.player2 = new Rogue.Entity
 			#	parent: app.game
@@ -59,7 +59,7 @@ Rogue.ready ->
 				@forceInside app.player, false
 
 			app.blocks = []
-			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: 0, require: ["sprite","collide"]})) for x in [0...app.tiles.size[0]]
+			app.blocks.push(new Rogue.Entity({image: app.assets.get('img/1.png'), x: x, y: 0, require: ["sprite","collide","AABB"]})) for x in [0...app.tiles.size[0]]
 			
 			app.tiles.place app.blocks
 

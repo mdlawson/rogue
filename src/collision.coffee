@@ -16,6 +16,7 @@ collision =
 		@AABB {x:p[0], y:p[1], width:1, height:1},r
 
 	AABBhitmap: (r,e) ->
+		unless collision.AABB r, e.rect() then return false
 		for dir in e.hitmap
 			for p in dir
 				if @hitTest [e.x+p[0],e.y+p[1]],r
@@ -27,7 +28,7 @@ collision =
 		data = ctx.getImageData(0,0,img.width,img.height)
 		pix = data.data
 		y = 0
-		iters = [[y,x,res[1],res[0]],[x,y,res[0],res[1]],[y,x,-res[1],-res[0]],[x,y,-res[0],-res[1]]]
+		points = []
 		hitmap = [[],[],[],[]]
 		while y <= img.height
 			x = 0
@@ -35,42 +36,44 @@ collision =
 			while x <= img.width
 				index = (offset+x)*4
 				if pix[index+3] isnt 0
-					hitmap[0].push([x,y])
-					break
+					points.push([x,y])
 				x+=res[0]
 			y+=res[1]
-		x = 0
-		while x <= img.width
-			y = 0
-			offset = img.width*x
-			while y <= img.height
-				index = (offset+y)*4
-				if pix[index+3] isnt 0
-					hitmap[1].push([x,y])
-					break
-				y+=res[1]
-			x+=res[0]
-		y = img.height
-		while y >= 0
-			x = img.width
-			offset = img.width*y
-			while x >= 0
-				index = (offset+x)*4
-				if pix[index+3] isnt 0
-					hitmap[2].push([x,y])
-					break
-				x-=res[0]
-			y-=res[1]
-		x = img.width
-		while x >= 0
-			y = img.height
-			offset = img.width*x
-			while y >= 0
-				index = (offset+y)*4
-				if pix[index+3] isnt 0
-					hitmap[3].push([x,y])
-					break
-				y-=res[1]
-			x-=res[0]
+		for point in points
+			if point[0] >= math.round(img.width/2) then hitmap[1].push(point) else hitmap[3].push(point)
+			if point[1] >= math.round(img.height/2) then hitmap[2].push(point) else hitmap[0].push(point)
 		return hitmap
+	type: {}
+
+class c.AABB
+	type: "AABB"
+	collide: (obj) ->
+		if obj.forEach
+			obj.forEach (o) => @collide o
+		if obj.type is @type then return collision.AABB @rect(), obj.rect()
+		else if obj.type is "hitmap" then return collision.AABBhitmap @rect(), obj
+		return false
+class c.hitmap
+	type: "hitmap"
+	init: ->
+		@_recalculateImage()
+	_recalculateImage: ->
+		@width = @image.width
+		@height = @image.height
+		@xOffset = math.round(@width/2)
+		@yOffset = math.round(@height/2)
+		@hitmap = collision.createHitmap @image
+	collide: (obj) ->
+		if obj.forEach
+			obj.forEach (o) => @collide o
+		unless collision.AABB @rect(), obj.rect() then return false
+		if obj.type is @type and collision
+			for dir in obj.hitmap
+				for opoint in dir
+					for dir2 in @hitmap
+						for point in dir2
+							if opoint[0]+obj.x is point[0]+@x and opoint[1]+obj.y is point[1]+@y then return true	
+			return false
+		else if obj.type is "AABB" then return collision.AABBhitmap obj.rect(),@
+
 

@@ -13,7 +13,7 @@ class AssetManager
 		@queue = @queue.concat url
 
 	get: (src) ->
-		if not this[src]? then Rogue.log 2,"asset not loaded: #{src}"
+		if not this[src]? then log 2,"asset not loaded: #{src}"
 		this[src]
 
 	loadAll: (options) ->
@@ -28,7 +28,7 @@ class AssetManager
 			if ext in value
 				type = key
 		if not type?
-			Rogue.log 2,"unknown extension on: #{src}"
+			log 2,"unknown extension on: #{src}"
 			return
 		switch type
 			when "image"
@@ -64,10 +64,11 @@ class AssetManager
 
 	onerror: (asset) ->
 		@ecount++
-		Rogue.log 2,"could not load asset: #{asset.src}"
+		log 2,"could not load asset: #{asset.src}"
 		@loaded asset
 
 	loaded: (asset) ->
+#		log 2, "loaded:",asset
 		name = asset.name or asset.src
 		this[asset.type][name.split(".")[0]] = asset
 		this[name] = asset

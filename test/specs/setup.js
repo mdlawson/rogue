@@ -43,7 +43,7 @@
         app.player = new Rogue.Entity({
           parent: app.game,
           image: app.assets.get('img/2.png'),
-          require: ["move", "collide", "gravity"],
+          require: ["move", "collide", "AABB", "gravity"],
           onHit: function(col) {
             if (col.dir === "bottom") {
               return this.canJump = true;
@@ -65,7 +65,7 @@
             image: app.assets.get('img/1.png'),
             x: x,
             y: 0,
-            require: ["sprite", "collide"]
+            require: ["sprite", "collide", "AABB"]
           }));
         }
         return app.tiles.place(app.blocks);

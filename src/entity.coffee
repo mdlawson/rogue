@@ -84,28 +84,23 @@ class c.tile
 
 class c.collide
 	init: ->
-		@import ["sprite"]
+		@import ["sprite"] unless "layer" in @components
 		#@updates[97] = @findCollisions
-
-	collide: (obj) ->
-		if obj.forEach
-			obj.forEach (o) => @collide o
-		if obj in @colliding then true else false
 
 	findCollisions: ->
 		solid = @parent.find(["collide"])
 		util.remove solid, @
-		results = []
+		@colliding = []
 		for obj in solid
-			dir = collision.AABB(@rect(),obj.rect())
+			dir = @collide obj
 			if dir
 				col = 
 					dir: dir
 					entity: obj
 				if @onHit? then @onHit col
-				results.push col
-					
-		@colliding = results
+				@colliding.push col
+		return @colliding
+
 	move: (x,y) ->
 		if Math.abs(x) < 1 and Math.abs(y) < 1
 				return false
@@ -119,13 +114,6 @@ class c.collide
 					return true
 			else return false
 		else return true
-
-class c.collidePixel
-	init: ->
-		@hitmap = collision.createHitmap @
-		@import ["collide"]
-	collide: (obj) ->
-		#if util.collide @rect(), obj.rect()
 
 class c.layer extends c.sprite
 	init: ->

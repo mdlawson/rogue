@@ -305,7 +305,7 @@ util =
 			if comp not in obj.components
 				obj.components.push comp
 				util.mixin obj, new c[comp]
-				obj.init()
+				if obj.init then obj.init()
 				delete obj.init; delete obj.import
 
 find = (c) ->
