@@ -82,8 +82,19 @@ class KeyboardManager
 class Mouse
 	constructor: (@context) ->
 		@context.oncontextmenu = -> false
+		buttons = ["left","middle","right"]
+		actions = ["click","down","up"]
 		mousemove = (e) =>
 			@x = e.offsetX
 			@y = e.offsetX
+		for b in buttons
+			@[b] = {}
+			for a in actions
+				@[b][a] = ->
+		for a in actions
+				listener = if a is "click" then "onclick" else "onmouse#{a}"
+				@context[listener] = (e) =>
+					@[buttons[e.button]][e.type.replace("mouse","")](e)
+					e.preventDefault()
 		@context.onmousemove = mousemove
-	click: (fn) ->
+

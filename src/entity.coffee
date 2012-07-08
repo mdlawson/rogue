@@ -154,7 +154,3 @@ class c.gravity
 		@updates[96] = ->
 			if @dy > @gravity
 				@dy -= 1
-
-
-
-

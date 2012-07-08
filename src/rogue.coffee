@@ -307,7 +307,8 @@ util =
 				util.mixin obj, new c[comp]
 				if obj.init then obj.init()
 				delete obj.init; delete obj.import
-
+	IE: ->
+		###@cc_on navigator.appVersion @###
 find = (c) ->
 	found = []
 	for ent in @e

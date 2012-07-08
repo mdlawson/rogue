@@ -38,6 +38,7 @@ class c.AABB
 		if obj.type is @type then return collision.AABB @rect(), obj.rect()
 		else if obj.type is "hitmap" then return collision.AABBhitmap @rect(), obj
 		return false
+
 class c.hitmap
 	type: "hitmap"
 	init: ->
@@ -61,5 +62,10 @@ class c.hitmap
 							if opoint[0]+obj.x is point[0]+@x and opoint[1]+obj.y is point[1]+@y then return true	
 			return false
 		else if obj.type is "AABB" then return collision.AABBhitmap obj.rect(),@
+
+class c.polygon
+	type: "polygon"
+	init: ->
+		unless @points then log 2,"Polygons must have points!"
 
 
