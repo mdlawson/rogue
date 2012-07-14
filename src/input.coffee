@@ -8,10 +8,7 @@ class KeyboardManager
 			pressedKeys[e.keyCode] = key
 			if e.keyCode in fn then fn[e.keyCode]()
 			e.preventDefault()
-
 		@context.onkeydown = @context.onkeyup = handleEvent
-		#window.addEventListener('keyup', handleEvent,false)
-		#window.addEventListener('keydown', handleEvent,false)
 
 	press: (key, fn) ->
 		if key.forEach
@@ -90,11 +87,11 @@ class Mouse
 		for b in buttons
 			@[b] = {}
 			for a in actions
-				@[b][a] = ->
+				@[b][a] = () ->
 		for a in actions
 				listener = if a is "click" then "onclick" else "onmouse#{a}"
 				@context[listener] = (e) =>
+					console.log e.button
 					@[buttons[e.button]][e.type.replace("mouse","")](e)
 					e.preventDefault()
 		@context.onmousemove = mousemove
-

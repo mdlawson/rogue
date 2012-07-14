@@ -20,7 +20,6 @@ class c.sprite
 		@x ?= 0
 		@y ?= 0	
 		if @scaleFactor? then @scale @scaleFactor, @pixel else @_recalculateImage()
-		@updates[99] = @draw
 	draw: ->
 		c = @parent.context
 		r = math.round
@@ -128,7 +127,6 @@ class c.layer extends c.sprite
 		@scrollY ?= false
 		@scrollX ?= true
 		@speed ?= 0
-		@updates[99] = @draw
 	draw: (x=0, y=0)->
 		rect = @parent.rect()
 		r = math.round

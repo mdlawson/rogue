@@ -1,4 +1,4 @@
-class TileMap extends Entity
+class TileMap
 	constructor: (options={}) ->
 		@x = options.x or 0
 		@y = options.y or 0
@@ -9,7 +9,6 @@ class TileMap extends Entity
 		@parent = options.parent
 		@components = []
 		@tiles = ({parent: @} for x in [0...@size[1]] for y in [0...@size[0]])
-		@updates = {99:@draw}
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
 		for y in [0...@size[1]]
 			for x in [0...@size[0]]
@@ -49,14 +48,14 @@ class TileMap extends Entity
 		(if @tiles[x]?[y]? then tiles.push(@tiles[x][y].content)) for x in [x1..x2] for y in [y1..y2]
 		return tiles
 
-	draw: ->
-		tiles = @atRect
-			x: if @parent.x then @parent.x - @x else 0
-			y: if @parent.y then @parent.y - @y else 0
-			width: @parent.width
-			height: @parent.height
-		for tile in tiles
-			for obj in tile
-				obj.draw()
+#	draw: ->
+#		tiles = @atRect
+#			x: if @parent.x then @parent.x - @x else 0
+#			y: if @parent.y then @parent.y - @y else 0
+#			width: @parent.width
+#			height: @parent.height
+#		for tile in tiles
+#			for obj in tile
+#				obj.draw()
 	rect: -> @
 

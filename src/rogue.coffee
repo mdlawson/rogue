@@ -54,7 +54,7 @@ class Game
 		@state = state
 		@state.setup()
 		@loop = new GameLoop @context,@showFPS
-		@loop.add @state.update
+		@loop.add [@state.update,@state.draw]
 		@loop.start()
 
 
@@ -132,7 +132,7 @@ class RollingAverage
 # 		parent: myGame
 # 		viewWidth: 1000
 # 		viewHeight: 300
-class ViewPort extends Entity
+class ViewPort
 	# Makes a new ViewPort instance 
 	# @param [Object] options the viewport options
 	# @option options [Canvas] canvas the canvas the viewport should render on
@@ -159,7 +159,6 @@ class ViewPort extends Entity
 		@y = @options.y or 0
 		@e = []
 		@updates = []
-		@updates[99] = @draw
 	# adds an {Entity} to the viewport, updates its parent automatically. 
 	# The {Entity} will now be updated with the viewport, and drawn relative to the viewport
 	# @param [Entity] entity the {Entity} to add
@@ -172,6 +171,12 @@ class ViewPort extends Entity
 			entity.parent = @
 			@e.push(entity)
 			@parent.e.push(entity)
+	
+	update: ->
+		for entity in @e
+			if @close(entity) and entity.update?
+				entity.update()
+		func.call(@) for func in @updates when func?
 
 	# The draw function of the viewport, calls update on all visible enclosed entities.
 	draw: ->
@@ -181,8 +186,8 @@ class ViewPort extends Entity
 		@context.rect(@x+@viewX, @y+@viewY, @width, @height)
 		@context.clip()
 		for entity in @e
-			if @visible entity
-				entity.update()
+			if @visible(entity) and entity.draw?
+				entity.draw()
 		@context.restore()
 
 	# Moves the viewport by a given amount, ensures the viewport is kept within the bounds of the viewable area.
@@ -252,6 +257,13 @@ class ViewPort extends Entity
 	find: (components) ->
 		find.call(@,components)
 
+	close: (entity) ->
+		collision.AABB entity.rect(),
+			width: @width*2
+			height: @height*2
+			x:@viewX-@width/2
+			y:@viewY-@height/2
+
 
 
 # Logging function, supports loglevels and generates appropriate 
@@ -308,7 +320,7 @@ util =
 				if obj.init then obj.init()
 				delete obj.init; delete obj.import
 	IE: ->
-		###@cc_on navigator.appVersion @###
+		`//@cc_on navigator.appVersion`
 find = (c) ->
 	found = []
 	for ent in @e

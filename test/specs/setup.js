@@ -85,8 +85,11 @@
         if (app.input.pressed("down")) {
           app.player.move(0, 2);
         }
-        app.game.clear();
         return app.viewport.update();
+      },
+      draw: function() {
+        app.game.clear();
+        return app.viewport.draw();
       }
     };
     app.assets = new Rogue.AssetManager();

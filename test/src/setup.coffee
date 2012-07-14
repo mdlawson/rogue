@@ -77,10 +77,10 @@ Rogue.ready ->
 				app.player.move(0,2)
 
 			#app.player.image = app.animation.next()
-
-			app.game.clear()
-
 			app.viewport.update()
+		draw: ->
+			app.game.clear()
+			app.viewport.draw()
 
 	app.assets = new Rogue.AssetManager()
 	app.assets.add ['img/1.png','img/2.png','img/b1.png','img/b2.png', 'sound/jump.ogg', 'sound/jump.mp3']
