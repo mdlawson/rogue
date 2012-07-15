@@ -4,9 +4,10 @@ class TileMap
 		@y = options.y or 0
 		@res = options.res or [32,32]
 		@size = options.size or [100,100]
+		@parent = options.parent
+		if options.name then @name = options.name
 		@width = @size[0]*@res[0]
 		@height = @size[1]*@res[1]
-		@parent = options.parent
 		@components = []
 		@tiles = ({parent: @} for x in [0...@size[1]] for y in [0...@size[0]])
 		dirs = {s: [0,1], e: [1,0], n: [0,-1], w: [-1,0]}
