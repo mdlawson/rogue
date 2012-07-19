@@ -170,25 +170,26 @@ class c.tween
     @tweens = []
     @updates[95] = ->
       for tween in @tweens
-        if tween.tl() > 0 then tween.run() else util.remove @tweens,tween
-  tween: (props, time) ->
-    @tweens.push new Tween(@,props,time)
+        unless tween.run() then util.remove @tweens,tween          
+  tween: (props, time, cb) ->
+    @tweens.push new Tween(@,props,time,cb)
     return @
 
 class Tween
-  constructor: (@target,@result,time) ->
-    @iter = {}
-    @t = time*60
-    for prop, val of @result
-      unless isNaN(val) or isNaN(@target[prop])
-        @iter[prop] = (val-@target[prop])/@t
+  constructor: (@en,@props,time,func,@cb) ->
+    @func = func or (t,b,c,d) -> b+c*(t/d)
+    @d = time*60; @t = 0; @b = {}; @c = {}
+    for prop, val of @props
+      unless isNaN(val) or isNaN(@en[prop])
+        @c[prop] = val-@en[prop]
+        @b[prop] = @en[prop]
       else
         log 2, "Cannot tween #{prop} as only numerics can be tweened"
-        return
   run: ->
-    for prop, val of @iter
-      if prop is "x" then @target.move(val,0)
-      else if prop is "y" then @target.move(0,val)
-      @target[prop] += val
-  tl: ->
-    @t--
+    for prop, val of @c
+      @en[prop] = @func(@t,@b[prop],@c[prop],@d)
+    if @t++ is @d
+      if @cb? then @cb()
+      false
+    else
+      true
