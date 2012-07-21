@@ -11,38 +11,29 @@
     app.mouse = new Rogue.Mouse(app.game);
     app.state = {
       setup: function() {
-        var x, _i, _ref;
+        var assets, x, _i, _ref;
+        assets = app.assets.core;
         console.log("setup run");
-        app.sounds = new Rogue.SoundBox(app.assets.sound);
-        app.sounds.func("jump", "sound/jump");
-        app.sprites = new Rogue.SpriteSheet({
-          image: app.assets.get('img/2.png'),
-          res: [16, 16]
-        });
-        app.animation = new Rogue.Animation({
-          spritesheet: app.sprites,
-          speed: 15
-        });
         app.viewport = new Rogue.ViewPort({
           parent: app.game,
           viewWidth: 1000,
           viewHeight: 400
         });
         app.bg1 = new Rogue.Entity({
-          image: app.assets.get('img/b1.png'),
+          image: assets.bg1,
           speed: 0.5,
           repeatX: true,
           require: ["layer"]
         });
         app.bg2 = new Rogue.Entity({
-          image: app.assets.get('img/b2.png'),
+          image: assets.bg2,
           speed: 0.9,
           repeatX: true,
           require: ["layer", "collide", "hitmap"]
         });
         app.player = new Rogue.Entity({
           parent: app.game,
-          image: app.assets.get('img/2.png'),
+          image: assets.blue,
           require: ["move", "collide", "AABB", "gravity", "tween"],
           onHit: function(col) {
             if (col.dir === "bottom") {
@@ -62,7 +53,7 @@
         app.blocks = [];
         for (x = _i = 0, _ref = app.tiles.size[0]; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
           app.blocks.push(new Rogue.Entity({
-            image: app.assets.get('img/1.png'),
+            image: assets.red,
             x: x,
             y: 0,
             require: ["sprite", "collide", "AABB"]
@@ -78,7 +69,7 @@
           app.player.move(-2, 0);
         }
         if (app.input.pressed("up")) {
-          app.sounds.jump();
+          app.assets.core.jump.play();
           app.player.canJump = false;
           app.player.dy = 17;
         }
@@ -92,17 +83,39 @@
         return app.viewport.draw();
       }
     };
-    app.assets = new Rogue.AssetManager();
-    app.assets.add(['img/1.png', 'img/2.png', 'img/b1.png', 'img/b2.png', 'sound/jump.ogg', 'sound/jump.mp3']);
-    app.assets.loadAll({
-      onFinish: function() {
-        console.log("Assets Loaded");
-        return app.game.start(app.state);
+    app.assets = new Rogue.AssetManager({
+      baseUrl: "",
+      packs: {
+        core: [
+          {
+            name: "bg1",
+            src: "img/b1.png"
+          }, {
+            name: "bg2",
+            src: "img/b2.png"
+          }, {
+            name: "red",
+            src: "img/1.png"
+          }, {
+            name: "blue",
+            src: "img/2.png"
+          }, {
+            name: "jump",
+            src: "sound/jump.ogg",
+            alt: "sound/jump.mp3"
+          }
+        ]
       },
-      onLoad: function(percent) {
-        return console.log("Assets loading: " + percent);
-      }
+      preload: false
     });
+    app.assets.on("load", "core", function(asset, percent) {
+      return console.log("Assets loading: " + percent);
+    });
+    app.assets.on("complete", "core", function() {
+      console.log("Assets loaded");
+      return app.game.start(app.state);
+    });
+    app.assets.download("core");
     return window.app = app;
   });
 

@@ -178,6 +178,13 @@ util =
   # Makes a new canvas
   canvas: -> document.createElement("canvas")
 
+  imgToCanvas: (i) ->
+    c = @canvas()
+    c.src = i.src; c.width = i.width; c.height = i.height
+    cx = c.getContext "2d"
+    cx.drawImage i,0,0,i.width,i.height
+    c
+
   isArray: (value) ->
     Object::toString.call(value) is '[object Array]'
 
@@ -185,7 +192,7 @@ util =
     a.splice a.indexOf(val), 1
 
   mixin: (obj, mixin) ->
-    for name, method of mixin
+    for name, method of mixin when method isnt null
       if method.slice
         obj[name] = method.slice(0)
       else
@@ -232,7 +239,6 @@ Rogue.GameLoop        = GameLoop
 Rogue.TileMap         = TileMap
 Rogue.AssetManager    = AssetManager
 Rogue.SpriteSheet     = SpriteSheet
-Rogue.SoundBox        = SoundBox
 Rogue.gfx             = gfx
 Rogue.collision       = collision
 Rogue.Animation       = Animation

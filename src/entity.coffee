@@ -93,7 +93,6 @@ class c.tile
 class c.collide
   init: ->
     @import ["sprite"] unless "layer" in @components
-    #@updates[97] = @findCollisions
 
   findCollisions: ->
     solid = @parent.find(["collide"])

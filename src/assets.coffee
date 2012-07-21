@@ -1,94 +1,90 @@
 class AssetManager
-  constructor: ->
-    @count = 0
-    @ecount = 0
-    @queue = []
-    @image = {}
-    @sound = {}
-    @filetypes =
-      image: ["png","gif","jpg","jpeg","tiff"]
-      sound: ["mp3","ogg"]
-
-  add: (url) ->
-    @queue = @queue.concat url
-
-  get: (src) ->
-    if not this[src]? then log 2,"asset not loaded: #{src}"
-    this[src]
-
-  loadAll: (options) ->
-    @onFinish = options.onFinish
-    @onLoad = options.onLoad
-    @load(a) for a in @queue
-
-  load: (src) ->
+  constructor: (manifest) ->
+    @callbacks = {load:{},complete:{},error:{}}
+    @base = manifest.baseUrl or ""
+    @packs = {}
+    @total = @complete = 0
+    for name,contents of manifest.packs
+      @packs[name] = contents
+      @total += contents.length
+    manifest.preload and @downloadAll()
+  download: (pack) ->
     that = @
-    ext = src.split(".").pop()
-    for key,value of @filetypes
-      if ext in value
-        type = key
-    if not type?
-      log 2,"unknown extension on: #{src}"
-      return
-    switch type
-      when "image"
-        asset = new Image()
-        asset.onload = ->
-          canvas = util.canvas()
-          canvas.type = type
-          canvas.width = @width
-          canvas.height = @height
-          canvas.src = src
-          context = canvas.getContext "2d"
-          context.drawImage @, 0, 0, @width, @height
-          that.count++
-          that.loaded canvas
-        asset.onerror = -> that.onerror(@)
-          
-        asset.src = src
-      when "sound"
-        asset = new Audio(src)
-        asset.type = type
-        asset.name = src
-        switch ext
-          when 'mp3' then codec = 'audio/mpeg'
-          when 'ogg' then codec = 'audio/ogg'
-        unless asset.canPlayType(codec) then @loaded asset
-        cb = ->
-          @removeEventListener "canplaythrough", cb
-          that.count++
-          that.loaded @
-        asset.addEventListener "canplaythrough", cb
-        asset.onerror = -> that.onerror(@)
-        asset.load()
-
-  onerror: (asset) ->
-    @ecount++
-    log 2,"could not load asset: #{asset.src}"
-    @loaded asset
+    contents = @packs[pack]
+    unless contents?
+      log 2, "Pack #{pack} does not exist"
+      return false
+    unless contents.loaded is contents.length
+      contents.loaded = 0
+      for asset in contents
+        ext = asset.src.split(".").pop()
+        asset.src = @base+asset.src
+        asset.pack = pack
+        for key,value of filetypes
+          if ext in value
+            asset.type = key
+        unless asset.type?
+          log 2,"Unknown asset type for extension: #{ext}"
+          return false
+        switch asset.type
+          when "image"
+            data = new Image()
+            data.a = asset
+            data.onload = ->
+              canvas = util.imgToCanvas @
+              a = util.mixin canvas,@a
+              that.loaded a
+            data.onerror = -> callback.call(that,@a,false)
+            data.src = asset.src
+          when "sound"
+            asset.alt = @base+asset.alt
+            data = new Audio()
+            data.preload = "none"
+            asset = util.mixin data,asset
+            unless data.canPlayType codecs[ext] then asset.src = asset.alt
+            asset.onerror = -> callback.call(that,asset,false)
+            asset.addEventListener 'canplaythrough', -> that.loaded @
+            asset.load()
 
   loaded: (asset) ->
-#   log 2, "loaded:",asset
-    name = asset.name or asset.src
-    this[asset.type][name.split(".")[0]] = asset
-    this[name] = asset
-    percentage = ((@count+@ecount)/@queue.length)*100
-    @onLoad(math.round percentage)
-    if percentage is 100 then @onFinish()
+    pack = @packs[asset.pack]
+    @[asset.pack] ?= {}
+    @[asset.pack][asset.name] = asset
+    callback.call(@,asset,true)
+  
+  downloadAll: ->
+    @download key for key,val of @packs
+      
+  on: (e,pack,fn) ->
+    if e in ["load","complete","error"]
+      if pack is "all"
+        @["on"+e] ?= []
+        @["on"+e].push fn
+      else 
+        @callbacks[e][pack] ?= []
+        @callbacks[e][pack].push fn
+
+  callback = (asset,status) ->
+    pack = @packs[asset.pack]
+    percent = math.round ++pack.loaded/pack.length*100
+    apercent = math.round ++@complete/@total*100
+    funcs = []
+    afuncs = []
+    if status then s = "load" else "error"
+    funcs = funcs.concat @callbacks[s][asset.pack]
+    afuncs = afuncs.concat @["on"+s]
+    if percent is 100 then funcs = funcs.concat @callbacks.complete[asset.pack]
+    if apercent is 100 then afuncs = afuncs.concat @oncomplete
+    func asset,percent for func in funcs when func
+    func asset,apercent for func in afuncs when func
     
-class SoundBox
-  constructor: (@sounds, map) ->
 
-  play: (sound) ->
-    if @sounds[sound]? then @sounds[sound].play()
-  pause: (sound) ->
-    if @sounds[sound]? then @sounds[sound].pause()
-  stop: (sound) ->
-    if @sounds[sound]? then @sounds[sound].stop()
-  func: (name,asset) ->
-    if @sounds[asset]? then this[name] = -> @play(asset) 
-    else "no such sound!"
-
+  filetypes =
+      image: ["png","gif","jpg","jpeg","tiff"]
+      sound: ["mp3","ogg"]
+  codecs =
+    'mp3':'audio/mpeg'
+    'ogg':'audio/ogg'
 
 class SpriteSheet
   constructor: (@options) ->
