@@ -25,14 +25,15 @@ Rogue.ready ->
 				image: assets.bg2
 				speed: 0.9
 				repeatX: true
-				require: ["layer","collide","hitmap"]
+				require: ["layer"]
 
 
 			app.player = new Rogue.Entity
 				parent: app.game
 				image: assets.blue
-				require: ["move","collide","AABB","gravity","tween"]
-				onHit: (col) -> if col.dir is "bottom" then @canJump = true 
+				require: ["move","collide","AABB","physics","tween"]
+			app.player.behavior.push Rogue.physics.behavior.gravity
+			app.player.on "hit", (col) -> if col.dir is "bottom" then @canJump = true 
 			#app.player2 = new Rogue.Entity
 			#	parent: app.game
 			#	image: app.assets.get 'img/2.png'
@@ -45,7 +46,7 @@ Rogue.ready ->
 				size: [30,1]
 
 			app.viewport.add [app.bg2, app.bg1, app.player, app.tiles]
-			app.viewport.updates[98] = ->
+			app.viewport.updates.push ->
 				@follow app.player
 				@forceInside app.player, false
 
@@ -54,21 +55,22 @@ Rogue.ready ->
 			
 			app.tiles.place app.blocks
 
-		update: ->
+		update: (dt) ->
 			if app.input.pressed("right")
 				app.player.move(2,0)
 			if app.input.pressed("left")
 				app.player.move(-2,0)
 			if app.input.pressed("up")
-				#if app.player.canJump
-				app.assets.core.jump.play()
-				app.player.canJump = false
-				app.player.dy = 17
+				if app.player.canJump
+					app.player.acc[1] = 20
+					app.assets.core.jump.play()
+					app.player.canJump = false
 			if app.input.pressed("down")
 				app.player.move(0,2)
 
 			#app.player.image = app.animation.next()
-			app.viewport.update()
+			#console.log dt
+			app.viewport.update(dt)
 		draw: ->
 			app.game.clear()
 			app.viewport.draw()

@@ -29,16 +29,17 @@
           image: assets.bg2,
           speed: 0.9,
           repeatX: true,
-          require: ["layer", "collide", "hitmap"]
+          require: ["layer"]
         });
         app.player = new Rogue.Entity({
           parent: app.game,
           image: assets.blue,
-          require: ["move", "collide", "AABB", "gravity", "tween"],
-          onHit: function(col) {
-            if (col.dir === "bottom") {
-              return this.canJump = true;
-            }
+          require: ["move", "collide", "AABB", "physics", "tween"]
+        });
+        app.player.behavior.push(Rogue.physics.behavior.gravity);
+        app.player.on("hit", function(col) {
+          if (col.dir === "bottom") {
+            return this.canJump = true;
           }
         });
         app.tiles = new Rogue.TileMap({
@@ -46,10 +47,10 @@
           size: [30, 1]
         });
         app.viewport.add([app.bg2, app.bg1, app.player, app.tiles]);
-        app.viewport.updates[98] = function() {
+        app.viewport.updates.push(function() {
           this.follow(app.player);
           return this.forceInside(app.player, false);
-        };
+        });
         app.blocks = [];
         for (x = _i = 0, _ref = app.tiles.size[0]; 0 <= _ref ? _i < _ref : _i > _ref; x = 0 <= _ref ? ++_i : --_i) {
           app.blocks.push(new Rogue.Entity({
@@ -61,7 +62,7 @@
         }
         return app.tiles.place(app.blocks);
       },
-      update: function() {
+      update: function(dt) {
         if (app.input.pressed("right")) {
           app.player.move(2, 0);
         }
@@ -69,14 +70,16 @@
           app.player.move(-2, 0);
         }
         if (app.input.pressed("up")) {
-          app.assets.core.jump.play();
-          app.player.canJump = false;
-          app.player.dy = 17;
+          if (app.player.canJump) {
+            app.player.acc[1] = 20;
+            app.assets.core.jump.play();
+            app.player.canJump = false;
+          }
         }
         if (app.input.pressed("down")) {
           app.player.move(0, 2);
         }
-        return app.viewport.update();
+        return app.viewport.update(dt);
       },
       draw: function() {
         app.game.clear();

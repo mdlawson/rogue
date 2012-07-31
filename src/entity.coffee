@@ -3,6 +3,7 @@ class Entity
     @components=[]
     @updates=[]
     util.mixin @, @options
+    util.eventer @
     if @require then @import(@require)
     delete @require
     if @parent then @parent.e.push @
@@ -16,8 +17,8 @@ class Entity
         @init() if @init?
         delete @init
 
-  update: ->
-    func.call(@) for func in @updates when func?
+  update: (dt) ->
+    func.call(@,dt) for func in @updates when func?
 
 c = {}
 
@@ -59,10 +60,6 @@ class c.sprite
 class c.move
   init: ->
     @import ["sprite"]
-    @dy ?= 0
-    @dx ?= 0
-    @updates[98] = ->
-      @move math.round(@dx),math.round(-@dy)
 
   move: (x,y) ->
     @x += x
@@ -95,8 +92,7 @@ class c.collide
     @import ["sprite"] unless "layer" in @components
 
   findCollisions: ->
-    solid = @parent.find(["collide"])
-    util.remove solid, @
+    solid = @parent.find ["collide"],@
     @colliding = []
     for obj in solid
       dir = @collide obj
@@ -104,18 +100,18 @@ class c.collide
         col = 
           dir: dir
           entity: obj
-        if @onHit? then @onHit col
+        @emit "hit",col
         @colliding.push col
     return @colliding
 
   move: (x,y) ->
-    if Math.abs(x) < 1 and Math.abs(y) < 1
-        return false
     @x += x
     @y += y
     if @findCollisions().length > 0
       @x -= x
       @y -= y
+      if Math.abs(x) < 1 and Math.abs(y) < 1
+        return false
       if @move(~~(x/2), ~~(y/2))
         if not @move(~~(x/2), ~~(y/2)) then return false else
           return true
@@ -159,7 +155,7 @@ class c.gravity
   init: ->
     @import ["move"]
     @gravity ?= -10
-    @updates[96] = ->
+    @updates.push ->
       if @dy > @gravity
         @dy -= 1
 
@@ -167,7 +163,7 @@ class c.tween
   init: -> 
     @tweening = false
     @tweens = []
-    @updates[95] = ->
+    @updates.push ->
       for tween in @tweens
         unless tween.run() then util.remove @tweens,tween          
   tween: (props, time, cb) ->

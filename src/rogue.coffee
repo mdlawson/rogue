@@ -31,8 +31,8 @@ class Game
   clear: ->
     @context.clearRect(0,0,@width,@height)
 
-  find: (components) ->
-    find.call(@,components)
+  find: (components,ex) ->
+    find.call(@,components,ex)
 
 class GameLoop
   constructor: (@parent,@showFPS) ->
@@ -46,13 +46,13 @@ class GameLoop
     Rogue.ticker.call window, @loop
   loop: =>
     @currentTick = (new Date()).getTime()
-    @tickDuration = @currentTick - @lastTick
-    @fps = @averageFPS.add(1000/@tickDuration)
+    @dt = (@currentTick - @lastTick) or 0.01667
+    @fps = @averageFPS.add(1000/@dt)
     unless @stopped or @paused
-      func.call(@parent) for func in @call
+      func.call(@parent,@dt/100) for func in @call
     unless @stopped
       Rogue.ticker.call window, @loop
-    if @showFPS then @parent.context.fillText(@fps,10,10)
+    if @showFPS then @parent.context.fillText("fps:#{@fps} step:#{@dt}",10,10)
     @lastTick = @currentTick
   # Pauses the game loop, loop still runs, but no functions are called
   pause: -> 
@@ -73,7 +73,7 @@ class RollingAverage
     @values = @values[1...@size]
     @values.push value
     if @count < @size then @count++
-    return parseInt (@values.reduce (t, s) -> t+s)/@count
+    return ((@values.reduce (t, s) -> t+s)/@count) | 0
 
 class ViewPort
   constructor: (@options) ->
@@ -100,11 +100,11 @@ class ViewPort
       @parent.e.push(entity)
       if entity.name? then @[entity.name] = entity
   
-  update: ->
+  update: (dt) ->
     for entity in @e
       if @close(entity) and entity.update?
-        entity.update()
-    func.call(@) for func in @updates when func?
+        entity.update(dt)
+    func.call(@,dt) for func in @updates when func?
 
   draw: ->
     @context.save()
@@ -154,8 +154,8 @@ class ViewPort
     if @viewX+@width > @viewWidth then @viewX = @viewWidth - @width
     if @viewY+@height > @viewHeight then @viewY = @viewHeight - @height
 
-  find: (components) ->
-    find.call(@,components)
+  find: (components,ex) ->
+    find.call(@,components,ex)
 
   close: (entity) ->
     collision.AABB entity.rect(),
@@ -189,7 +189,8 @@ util =
     Object::toString.call(value) is '[object Array]'
 
   remove: (a,val) ->
-    a.splice a.indexOf(val), 1
+    idx = a.indexOf(val)
+    idx and a.splice idx, 1
 
   mixin: (obj, mixin) ->
     for name, method of mixin when method isnt null
@@ -201,9 +202,17 @@ util =
     
   IE: ->
     `//@cc_on navigator.appVersion`
-find = (c) ->
+
+  eventer: (obj) ->
+    obj.handlers = {}
+    obj.on = (e,func) -> (@handlers[e] ?= []).push func
+    obj.off = (e,func) -> @handlers[e] and util.remove @handlers[e], func
+    obj.emit = (e, data...) -> @handlers[e] and for handler in @handlers[e] then handler.call @,data... 
+    obj
+
+find = (c,ex) ->
   found = []
-  for ent in @e
+  for ent in @e when ent isnt ex
       f = 0
       f++ for i in c when i in ent.components
       if f is c.length
@@ -214,6 +223,7 @@ math =
   # A faster round implementation
   round: (num) ->
     return (0.5 + num) | 0
+math.vector = v
 
 # Globals
 
@@ -234,6 +244,7 @@ Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
 Rogue.log             = log
 Rogue.util            = util
 Rogue.math            = math
+Rogue.physics         = physics
 Rogue.Game            = Game
 Rogue.GameLoop        = GameLoop
 Rogue.TileMap         = TileMap
