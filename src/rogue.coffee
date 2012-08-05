@@ -1,4 +1,14 @@
+# Base class on which the game is build. Provides basic state management functionality.
+# Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties
+
 class Game
+  
+  # @param [Object] options game setup options
+  # @option options [String] canvas an ID of a canvas element provided, one will be created if not
+  # @option options [Int] width width of canvas, defaults to 400
+  # @option options [Int] height height of canvas, defaults to 300
+  # @option options [Bool] showfps whether fps should be displayed
+  #
   constructor: (@options={}) ->
     @canvas = document.getElementById(options.canvas) if @options.canvas?
     if not @canvas?
@@ -11,10 +21,19 @@ class Game
     @canvas.x = @canvas.y = 0
     @context = @canvas.getContext('2d')
 
+  # Starts the game with a state
+  # @param [Object] state game state
+  # @option state [Function] setup function to run when state is initialised
+  # @option state [Function] update function to run every tick in which game logic is performed. is passed dt, the change in time since the last tick.
+  # @option state [Function] draw function to run every tick in which the game graphics are drawn
+  #
   start: (state) ->
     loading = @options.loadingScreen ? ->
     @switchState(state)
 
+  # Switches the state to a new state, saving the old state in game.oldState
+  # @param [Object] state state to switch to
+  #
   switchState: (state) ->
     @e = []
     @loop and @loop.stop()
@@ -28,12 +47,20 @@ class Game
 
   # Clears the canvas, can be run at the end of each frame.
   # @todo automatic partial update system?
+  #
   clear: ->
     @context.clearRect(0,0,@width,@height)
 
+  # Finds entities with a given set of components that are children of the game
+  # @param [Array] components array of components to match against
+  # @param [Entity] ex an entity to exclude from the matching
+  # @return [Array] array of matched entities
+  #
   find: (components,ex) ->
     find.call(@,components,ex)
 
+# Gameloop class, used internally by Game, gets bound to game.loop
+#
 class GameLoop
   constructor: (@parent,@showFPS) ->
     @fps = 0
@@ -44,12 +71,14 @@ class GameLoop
     @paused = @stopped = false
     firstTick = currentTick = lastTick = (new Date()).getTime()
     Rogue.ticker.call window, @loop
+  # loop function that is called every tick
   loop: =>
     @currentTick = (new Date()).getTime()
-    @dt = (@currentTick - @lastTick) or 0.01667
+    @dt = (@currentTick - @lastTick) or 17
     @fps = @averageFPS.add(1000/@dt)
     unless @stopped or @paused
-      func.call(@parent,@dt/100) for func in @call
+      if @dt > 20 then @dt = 17
+      func.call(@parent,@dt/1000) for func in @call
     unless @stopped
       Rogue.ticker.call window, @loop
     if @showFPS then @parent.context.fillText("fps:#{@fps} step:#{@dt}",10,10)
@@ -57,13 +86,16 @@ class GameLoop
   # Pauses the game loop, loop still runs, but no functions are called
   pause: -> 
     @paused = true
-
+  # Stops the game loop
   stop: ->
     @stopped = true
 
+  # adds a function or an array of functions to the loop
   add: (func) ->
     @call = @call.concat func
 
+# A simple rolling average class, used internally for smoothing fps
+#
 class RollingAverage
   constructor: (@size) ->
     @values = new Array @size
@@ -75,7 +107,17 @@ class RollingAverage
     if @count < @size then @count++
     return ((@values.reduce (t, s) -> t+s)/@count) | 0
 
+# Viewport class, most games will use this. Expands the game world to be larger than the canvas.
+#
 class ViewPort
+  # @param [Object] options options for setting up the viewport
+  # @option options [Game] parent the parent game instance to attach the viewport to
+  # @option options [Canvas] canvas the canvas this viewport should render on, defaults to the parents canvas
+  # @option options [Int] width the width of the viewport, defaults to the canvas width
+  # @option options [Int] height the height of the viewport, defaults to the canvas height
+  # @option options [Int] viewWidth the width of the viewable area, defaults to width
+  # @option options [Int] viewHeight the height of the viewable area, defaults to height
+  #
   constructor: (@options) ->
     @parent = @options.parent
     @canvas = @options.canvas or @parent.canvas or util.canvas()
@@ -91,6 +133,10 @@ class ViewPort
     @e = []
     @updates = []
 
+  # Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, 
+  # and position is drawn relative to the viewports position
+  # @param [Entity] entity entity to add, alternitively an array of entities can be given.
+  #
   add: (entity) ->
     if entity.forEach
       entity.forEach (obj) => @add obj
@@ -99,13 +145,18 @@ class ViewPort
       @e.push(entity)
       @parent.e.push(entity)
       if entity.name? then @[entity.name] = entity
-  
+
+  # Updates all entities within the viewport. The viewport update function should be called from your states update function
+  # @param [Float] dt dt, the time elapsed between ticks. all update functions should be passed dt if physics is needed.
+  #
   update: (dt) ->
     for entity in @e
       if @close(entity) and entity.update?
         entity.update(dt)
     func.call(@,dt) for func in @updates when func?
 
+  # Draws all entities within the viewport. The viewport draw function should be called from within your states draw function.
+  #
   draw: ->
     @context.save()
     @context.translate(-@viewX, -@viewY)
@@ -117,34 +168,56 @@ class ViewPort
         entity.draw()
     @context.restore()
 
+  # moves the view area by [x,y]
+  # @param [Int] x 
+  # @param [Int] y
+  #
   move: (x,y) ->
     @viewX += x
     @viewY += y
     @keepInBounds()
 
+  # moves the view area to [x,y]
+  # @param [Int] x 
+  # @param [Int] y
+  #
   moveTo: (x,y) ->
     @viewX = x
     @viewY = y
     @keepInBounds()
 
+  # Makes the view follow an entity, so that entity is always in the center
+  # @param [Entity] entity the entity to follow
+  #
   follow: (entity) ->
     @viewX = entity.x - math.round(@width/2)
     @viewY = entity.y - math.round(@height/2)
     @keepInBounds()
 
-  forceInside: (entity, visible=false, buffer=0) ->
-    if visible then w = @width; h = @height else w = @viewWidth; h = @viewHeight
+  # prevents an entity from going outside of the view area.
+  # @param [Entity] entity the entity to force inside
+  # @param [Int] buffer the minimum distance an entity can be from the edge of the view area, defaults to 0
+  #
+  forceInside: (entity, buffer=0) ->
+    w = @viewWidth; h = @viewHeight
     if entity.x < buffer then entity.x = buffer
     if entity.y < buffer then entity.y = buffer
     if entity.x > w-buffer then entity.x = w-buffer
     if entity.y > h-buffer then entity.y = h-buffer
  
+  # used for checking the visibility of objects
+  # @return [Rect] a rectangle object of the currently visible area
+  #
   rect: ->
     width: @width
     height: @height
     x: @viewX
     y: @viewY
 
+  # Checks if an entity is currently visible.
+  # @param [Entity] entity
+  # @return [Bool] true if the entity is visible
+  #
   visible: (entity) ->
     collision.AABB entity.rect(), @rect()
 
@@ -154,6 +227,8 @@ class ViewPort
     if @viewX+@width > @viewWidth then @viewX = @viewWidth - @width
     if @viewY+@height > @viewHeight then @viewY = @viewHeight - @height
 
+  # @see Game.find
+  #
   find: (components,ex) ->
     find.call(@,components,ex)
 
@@ -164,6 +239,15 @@ class ViewPort
       x:@viewX-@width/2
       y:@viewY-@height/2
 
+# Logging function. uses Rogue.loglevel to determine which logs should be displayed.
+# 1: error
+# 2: warning
+# 3: info
+# 4: debug
+# All logs with numbers less than the current log level will be displayed.
+# @param [Int] level loglevel of this log
+# All other arguments are passed to the console function
+#
 log = (level, args...) ->
   return unless level <= Rogue.loglevel
   switch level
@@ -236,6 +320,9 @@ Rogue.ticker = window.requestAnimationFrame or
                window.oRequestAnimationFrame or
                window.msRequestAnimationFrame or
                (tick) -> window.setTimeout(tick, 1000/60)
+
+# Calls a function when the DOM is ready
+# @param [Function] f function to call               
 
 Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
   document.removeEventListener "DOMContentLoaded", arguments.callee, false

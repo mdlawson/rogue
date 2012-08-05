@@ -1,4 +1,11 @@
+
+# The main entity class. All entities are based on this.
+#
 class Entity
+
+  # @param [Object] options the attributes the new entity should have
+  # @option options [Array] require components that should be imported on creation
+  # @option options [Object] parent the parent of this entity, is set automatically when added to a ViewPort
   constructor: (@options) ->
     @components=[]
     @updates=[]
@@ -7,7 +14,8 @@ class Entity
     if @require then @import(@require)
     delete @require
     if @parent then @parent.e.push @
-
+  # imports an array of components or a single component to the entity
+  # @param [Array] imports array of components to import, or a string of a single component
   import: (imports) ->
     imports = [].concat(imports)
     for comp in imports
@@ -16,7 +24,7 @@ class Entity
         util.mixin @, new Rogue.components[comp]
         @init() if @init?
         delete @init
-
+  # The update function of the component, should be run each tick. This is done automatically by the viewport
   update: (dt) ->
     func.call(@,dt) for func in @updates when func?
 
@@ -90,16 +98,14 @@ class c.tile
 class c.collide
   init: ->
     @import ["sprite"] unless "layer" in @components
+    @solid = if "physics" in @components then false else true
 
   findCollisions: ->
     solid = @parent.find ["collide"],@
     @colliding = []
     for obj in solid
-      dir = @collide obj
-      if dir
-        col = 
-          dir: dir
-          entity: obj
+      col = @collide obj
+      if col
         @emit "hit",col
         @colliding.push col
     return @colliding
@@ -117,6 +123,10 @@ class c.collide
           return true
       else return false
     else return true
+
+#   d = collision.movesearch @,x,y
+#   if d then @x+=d[0]; @y+=d[1]
+#   return d
 
 class c.layer extends c.sprite
   init: ->
@@ -150,14 +160,6 @@ class c.layer extends c.sprite
       @draw(x+@width,0)
     if @repeatY and @y+@height+y < rect.y+rect.height
       @draw(0,y+@height)
-
-class c.gravity
-  init: ->
-    @import ["move"]
-    @gravity ?= -10
-    @updates.push ->
-      if @dy > @gravity
-        @dy -= 1
 
 class c.tween
   init: -> 

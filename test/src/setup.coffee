@@ -16,60 +16,28 @@ Rogue.ready ->
 				viewWidth: 1000
 				viewHeight: 400
 
-			app.bg1 = new Rogue.Entity
-				image: assets.bg1
-				speed: 0.5
-				repeatX: true
-				require: ["layer"]
-			app.bg2 = new Rogue.Entity
-				image: assets.bg2
-				speed: 0.9
-				repeatX: true
-				require: ["layer"]
-
-
-			app.player = new Rogue.Entity
+			app.center = new Rogue.Entity
 				parent: app.game
 				image: assets.blue
-				require: ["move","collide","AABB","physics","tween"]
-			app.player.behavior.push Rogue.physics.behavior.gravity
-			app.player.on "hit", (col) -> if col.dir is "bottom" then @canJump = true 
-			#app.player2 = new Rogue.Entity
-			#	parent: app.game
-			#	image: app.assets.get 'img/2.png'
-			#	require: ["move","collide"]
-			#	x: 64
-			#	y: 64
+				require: ["sprite","collide","AABB"]
+				x: 150
+				y: 150
 
-			app.tiles = new Rogue.TileMap
-				y: 300
-				size: [30,1]
-
-			app.viewport.add [app.bg2, app.bg1, app.player, app.tiles]
-			app.viewport.updates.push ->
-				@follow app.player
-				@forceInside app.player, false
-
-			app.blocks = []
-			app.blocks.push(new Rogue.Entity({image: assets.red, x: x, y: 0, require: ["sprite","collide","AABB"]})) for x in [0...app.tiles.size[0]]
-			
-			app.tiles.place app.blocks
+			positions = [[150,0],[300,150],[150,300],[0,150]]
+			accel     = [[0,10],[-10,0],[0,-10],[10,0]]
+			for i in [0...4]
+				app["b"+i] = new Rogue.Entity
+					parent: app.game
+					image: assets.red
+					require: ["move","collide","AABB","physics"]
+					x: positions[i][0]
+					y: positions[i][1]
+					acc: accel[i]
+					#behavior: [Rogue.physics.behavior.collide]
+				app.viewport.add app["b"+i]
+			app.viewport.add [app.center]
 
 		update: (dt) ->
-			if app.input.pressed("right")
-				app.player.move(2,0)
-			if app.input.pressed("left")
-				app.player.move(-2,0)
-			if app.input.pressed("up")
-				if app.player.canJump
-					app.player.acc[1] = 20
-					app.assets.core.jump.play()
-					app.player.canJump = false
-			if app.input.pressed("down")
-				app.player.move(0,2)
-
-			#app.player.image = app.animation.next()
-			#console.log dt
 			app.viewport.update(dt)
 		draw: ->
 			app.game.clear()
@@ -89,14 +57,5 @@ Rogue.ready ->
 	app.assets.on "load","core", (asset,percent) -> console.log "Assets loading: #{percent}"
 	app.assets.on "complete","core", -> console.log "Assets loaded"; app.game.start app.state
 	app.assets.download("core")
-
-#	app.assets = new Rogue.AssetManager()
-#	app.assets.add ['img/1.png','img/2.png','img/b1.png','img/b2.png', 'sound/jump.ogg', 'sound/jump.mp3']
-#	app.assets.loadAll
-#		onFinish: -> 
-#			console.log "Assets Loaded"
-#			app.game.start app.state
-#
-#		onLoad: (percent) -> console.log "Assets loading: #{percent}"
 
 	window.app = app

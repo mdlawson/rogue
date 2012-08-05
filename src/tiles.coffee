@@ -24,7 +24,7 @@ class TileMap
       obj.forEach (item) => @place item
     else
       @parent.e.push(obj)
-#      obj.import("tile")
+      #obj.import("tile")
       obj.tile = @tiles[obj.x][obj.y]
       obj.parent = @parent
       @tiles[obj.x][obj.y].content.unshift(obj)
@@ -49,14 +49,5 @@ class TileMap
     (if @tiles[x]?[y]? then tiles.push(@tiles[x][y].content)) for x in [x1..x2] for y in [y1..y2]
     return tiles
 
-# draw: ->
-#   tiles = @atRect
-#     x: if @parent.x then @parent.x - @x else 0
-#     y: if @parent.y then @parent.y - @y else 0
-#     width: @parent.width
-#     height: @parent.height
-#   for tile in tiles
-#     for obj in tile
-#       obj.draw()
   rect: -> @
 
