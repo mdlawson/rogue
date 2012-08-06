@@ -39,7 +39,7 @@ class Game
     @loop and @loop.stop()
     @oldState = @state
     @state = state
-    @state.setup.call(@)
+    @state.setup.call(@state,@)
     @loop = new GameLoop @,@showFPS
     @loop.add [@state.update,@state.draw]
     @loop.start()
@@ -78,7 +78,7 @@ class GameLoop
     @fps = @averageFPS.add(1000/@dt)
     unless @stopped or @paused
       if @dt > 20 then @dt = 17
-      func.call(@parent,@dt/1000) for func in @call
+      func.call(@parent.state,@parent,@dt/1000) for func in @call
     unless @stopped
       Rogue.ticker.call window, @loop
     if @showFPS then @parent.context.fillText("fps:#{@fps} step:#{@dt}",10,10)
@@ -328,22 +328,22 @@ Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
   document.removeEventListener "DOMContentLoaded", arguments.callee, false
   f()
 
-Rogue.log             = log
-Rogue.util            = util
-Rogue.math            = math
-Rogue.physics         = physics
-Rogue.Game            = Game
-Rogue.GameLoop        = GameLoop
-Rogue.TileMap         = TileMap
-Rogue.AssetManager    = AssetManager
-Rogue.SpriteSheet     = SpriteSheet
-Rogue.gfx             = gfx
-Rogue.collision       = collision
-Rogue.Animation       = Animation
-Rogue.ViewPort        = ViewPort
-Rogue.components      = c
-Rogue.Entity          = Entity
-Rogue.KeyboardManager = KeyboardManager
-Rogue.Mouse           = Mouse
+Rogue.log          = log
+Rogue.util         = util
+Rogue.math         = math
+Rogue.physics      = physics
+Rogue.Game         = Game
+Rogue.GameLoop     = GameLoop
+Rogue.TileMap      = TileMap
+Rogue.AssetManager = AssetManager
+Rogue.SpriteSheet  = SpriteSheet
+Rogue.gfx          = gfx
+Rogue.collision    = collision
+Rogue.Animation    = Animation
+Rogue.ViewPort     = ViewPort
+Rogue.components   = c
+Rogue.Entity       = Entity
+Rogue.Keyboard     = Keyboard
+Rogue.Mouse        = Mouse
 
 Rogue.loglevel = 4

@@ -1,6 +1,5 @@
-class KeyboardManager
+class Keyboard
   constructor: (@context) ->
-
     handleEvent = (e) =>
       e = e or window.event
       #return unless e.target is @context
@@ -82,6 +81,7 @@ class Mouse
     buttons = ["left","middle","right"]
     actions = ["click","down","up"]
     mousemove = (e) =>
+      e = e or window.event
       @x = e.offsetX
       @y = e.offsetX
     for b in buttons
@@ -91,7 +91,7 @@ class Mouse
     for a in actions
         listener = if a is "click" then "onclick" else "onmouse#{a}"
         @context[listener] = (e) =>
-          console.log e.button
+          e = e or window.event
           @[buttons[e.button]][e.type.replace("mouse","")](e)
           e.preventDefault()
     @context.onmousemove = mousemove
