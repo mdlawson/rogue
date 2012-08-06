@@ -4,7 +4,7 @@ Rogue.ready ->
 
 	app.game = new Rogue.Game
 		fps: true
-	app.input = new Rogue.KeyboardManager(app.game.canvas)
+	app.input = new Rogue.Keyboard(app.game.canvas)
 	app.mouse = new Rogue.Mouse(app.game)
 	app.state =
 		setup: ->
@@ -33,11 +33,10 @@ Rogue.ready ->
 					x: positions[i][0]
 					y: positions[i][1]
 					acc: accel[i]
-					#behavior: [Rogue.physics.behavior.collide]
 				app.viewport.add app["b"+i]
 			app.viewport.add [app.center]
 
-		update: (dt) ->
+		update: (game,dt) ->
 			app.viewport.update(dt)
 		draw: ->
 			app.game.clear()

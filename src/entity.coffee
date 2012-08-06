@@ -6,32 +6,50 @@ class Entity
   # @param [Object] options the attributes the new entity should have
   # @option options [Array] require components that should be imported on creation
   # @option options [Object] parent the parent of this entity, is set automatically when added to a ViewPort
-  constructor: (@options) ->
-    @components=[]
-    @updates=[]
-    util.mixin @, @options
-    util.eventer @
-    if @require then @import(@require)
+  constructor: (options) ->
+    @updates=[]    
+    util.mixin @, options
+    #if @require then @components.add(@require)
+    
+    @ev         = new Eventer @
+    @components = new Importer Rogue.components,@
+    @components.add @require
+
     delete @require
+
     if @parent then @parent.e.push @
   # imports an array of components or a single component to the entity
   # @param [Array] imports array of components to import, or a string of a single component
-  import: (imports) ->
-    imports = [].concat(imports)
-    for comp in imports
-      if comp not in @components
-        @components.push comp
-        util.mixin @, new Rogue.components[comp]
-        @init() if @init?
-        delete @init
+
   # The update function of the component, should be run each tick. This is done automatically by the viewport
   update: (dt) ->
     func.call(@,dt) for func in @updates when func?
 
+class Importer
+  constructor: (@from,@dest,@mixin=true) ->
+  add: (imports) ->
+    imports = [].concat(imports)
+    for imp in imports when not @[imp]?
+      if @from[imp]?
+        @[imp] = new @from[imp]
+        if @mixin
+          for key,val of @[imp] when (key isnt "onadd" and key isnt "onremove" and key isnt "run" and val?)
+            @dest[key] = val
+        if @[imp].onadd then @[imp].onadd.call(@dest)
+      else log 2,"mixin #{imp} does not exist!"
+  remove: (imports) ->
+    imports = [].concat(imports)
+    for imp in imports when @[imp]?
+      if @mixin
+        for key,val of @[imp] when @dest[key]? and @dest[key] is @[imp][key]
+          delete @dest[key]
+      if @[imp].onremove then @[imp].onremove.call(@dest)
+      delete @[imp]
+
 c = {}
 
 class c.sprite
-  init: ->
+  onadd: ->
     unless @image then log 2, "Sprite entitys require an image"
     @x ?= 0
     @y ?= 0
@@ -66,8 +84,8 @@ class c.sprite
     @yOffset = math.round(@height/2)
 
 class c.move
-  init: ->
-    @import ["sprite"]
+  onadd: ->
+    @components.add "sprite"
 
   move: (x,y) ->
     @x += x
@@ -76,8 +94,8 @@ class c.move
   moveTo: (@x,@y) ->
 
 class c.tile
-  init: ->
-    @import ["sprite"]
+  onadd: ->
+    @components.add "sprite"
 
   move: (x,y) ->
     util.remove @tile.contents, @
@@ -96,9 +114,9 @@ class c.tile
     height: @height
 
 class c.collide
-  init: ->
-    @import ["sprite"] unless "layer" in @components
-    @solid = if "physics" in @components then false else true
+  onadd: ->
+    unless @components["layer"]? then @components.add "sprite"
+    @solid = if @components["physics"]? then false else true
 
   findCollisions: ->
     solid = @parent.find ["collide"],@
@@ -106,7 +124,7 @@ class c.collide
     for obj in solid
       col = @collide obj
       if col
-        @emit "hit",col
+        @ev.emit "hit",col
         @colliding.push col
     return @colliding
 
@@ -129,7 +147,7 @@ class c.collide
 #   return d
 
 class c.layer extends c.sprite
-  init: ->
+  onadd: ->
     @width ?= @image.width
     @height ?= @image.height
     @x ?= 0
@@ -162,15 +180,18 @@ class c.layer extends c.sprite
       @draw(0,y+@height)
 
 class c.tween
-  init: -> 
+  onadd: -> 
     @tweening = false
     @tweens = []
-    @updates.push ->
-      for tween in @tweens
-        unless tween.run() then util.remove @tweens,tween          
+    @updates.push applytweens
+  onremove: ->
+    util.remove @updates,applytweens   
   tween: (props, time, cb) ->
     @tweens.push new Tween(@,props,time,cb)
     return @
+  applytweens = -> 
+    for tween in @tweens
+      unless tween.run() then util.remove @tweens,tween
 
 class Tween
   constructor: (@en,@props,time,func,@cb) ->

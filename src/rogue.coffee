@@ -287,18 +287,18 @@ util =
   IE: ->
     `//@cc_on navigator.appVersion`
 
-  eventer: (obj) ->
-    obj.handlers = {}
-    obj.on = (e,func) -> (@handlers[e] ?= []).push func
-    obj.off = (e,func) -> @handlers[e] and util.remove @handlers[e], func
-    obj.emit = (e, data...) -> @handlers[e] and for handler in @handlers[e] then handler.call @,data... 
-    obj
+
+class Eventer
+  constructor: (@context) -> @handlers = {}
+  on: (e,func) -> (@handlers[e] ?= []).push func
+  off: (e,func) -> @handlers[e] and util.remove @handlers[e], func
+  emit: (e, data...) -> @handlers[e] and for handler in @handlers[e] then handler.call @context,data... 
 
 find = (c,ex) ->
   found = []
   for ent in @e when ent isnt ex
       f = 0
-      f++ for i in c when i in ent.components
+      f++ for i in c when ent.components[i]?
       if f is c.length
         found.push ent
   return found

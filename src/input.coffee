@@ -73,7 +73,7 @@ class Keyboard
     quote: 222
   }
   for num in [0...10] then keys[''+num]=48+num; keys['numpad'+num]=96+num; keys['f'+num]=112+num 
-  keys[char] = 65+i for char,i in 'abcdefghijklmnopqrstuvwxyz'
+  keys[chr] = 65+i for chr,i in 'abcdefghijklmnopqrstuvwxyz'
 
 class Mouse
   constructor: (@context) ->

@@ -31,29 +31,35 @@ v.mag    = (a)     -> sqrt a[0]*a[0]+a[1]*a[1]
 v.magSq  = (a)     -> a[0]*a[0]+a[1]*a[1]
 
 class c.physics
-  init: ->
-    @import ["move","collide"]
-    @behavior ?= []
+  onadd: ->
+    @components.add ["move","collide"]
+    @behavior = new Importer Rogue.physics.behavior,@,false
+    @behavior.add "collide"
     @updates.push (dt) ->
-      func.call(@,dt) for func in @behavior when func?
+      behave.run.call(@,dt) for name,behave of @behavior when behave.run?
       @intergrate dt
     @vel ?= [0,0]
     @acc ?= [0,0]
     @old = {}
     @friction ?= 0
     @mass ?= 1
-    @on "hit", (col) ->
-      if col.e2.solid
-        if col.dir is "left" or col.dir is "right" then @vel[0] = 0 else @vel[1] = 0
   intergrate: (dt) ->
     i = 0
     while i++ < 8 then intergrate(@,dt/8)
     #console.log @vel
   still: -> @vel[0] is 0 and @vel[1] is 0 and @acc[0] is 0 and @acc[1] is 0
 
+class b.gravity
+  run: ->
+    if @acc[1] < 9.8 
+      @acc[1]++
+      @acc[1] = 9.8 if @acc[1] > 9.8
 
-b.gravity = ->
-  if @acc[1] < 9.8 
-    @acc[1]++
-    @acc[1] = 9.8 if @acc[1] > 9.8
-
+class b.collide
+  responce = (col) ->
+    if col.e2.solid
+      if col.dir is "left" or col.dir is "right" then @vel[0] = 0 else @vel[1] = 0
+  onadd: ->
+    @ev.on "hit", responce
+  onremove: ->
+    @ev.off "hit", responce

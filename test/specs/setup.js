@@ -7,7 +7,7 @@
     app.game = new Rogue.Game({
       fps: true
     });
-    app.input = new Rogue.KeyboardManager(app.game.canvas);
+    app.input = new Rogue.Keyboard(app.game.canvas);
     app.mouse = new Rogue.Mouse(app.game);
     app.state = {
       setup: function() {
@@ -41,7 +41,7 @@
         }
         return app.viewport.add([app.center]);
       },
-      update: function(dt) {
+      update: function(game, dt) {
         return app.viewport.update(dt);
       },
       draw: function() {

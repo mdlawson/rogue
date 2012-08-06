@@ -175,8 +175,8 @@ window.require.define({"state": function(exports, require, module) {
           image: assets.blue,
           require: ["move", "collide", "AABB", "physics"]
         });
-        game.player.behavior.push(Rogue.physics.behavior.gravity);
-        game.player.on("hit", function(col) {
+        game.player.behavior.add("gravity");
+        game.player.ev.on("hit", function(col) {
           if (col.dir === "bottom") return this.canJump = true;
         });
         tiles = new Rogue.TileMap({

@@ -25,8 +25,8 @@ state =
       name: "player"
       image: assets.blue
       require: ["move","collide","AABB","physics"]
-    game.player.behavior.push Rogue.physics.behavior.gravity
-    game.player.on "hit", (col) -> if col.dir is "bottom" then @canJump = true 
+    game.player.behavior.add "gravity"
+    game.player.ev.on "hit", (col) -> if col.dir is "bottom" then @canJump = true 
 
     tiles = new Rogue.TileMap
       name: "tiles"

@@ -49,7 +49,7 @@ class c.AABB
 
 class c.hitmap
   type: "hitmap"
-  init: ->
+  onadd: ->
     @_recalculateImage()
 
   _recalculateImage: ->
@@ -73,7 +73,7 @@ class c.hitmap
 
 class c.polygon
   type: "polygon"
-  init: ->
+  onadd: ->
     unless @points then log 2,"Polygons must have points!"
 
 
