@@ -14,7 +14,8 @@ class Game
     if not @canvas?
       @canvas = util.canvas()
       document.body.appendChild(@canvas)
-    @canvas.tabIndex=1
+    @canvas.tabIndex=0
+    @canvas.style.outline="none"
     @width = @canvas.width = @options.width ? 400
     @height = @canvas.height = @options.height ? 300
     @showFPS = @options.fps ? false

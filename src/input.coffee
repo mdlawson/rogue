@@ -92,6 +92,7 @@ class Mouse
         listener = if a is "click" then "onclick" else "onmouse#{a}"
         @context[listener] = (e) =>
           e = e or window.event
-          @[buttons[e.button]][e.type.replace("mouse","")](e)
+          @context.focus()
+          @[buttons[e.button]][e.type.replace("mouse","")].call(@,e)
           e.preventDefault()
     @context.onmousemove = mousemove

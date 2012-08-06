@@ -5,7 +5,7 @@ Rogue.ready ->
 	app.game = new Rogue.Game
 		fps: true
 	app.input = new Rogue.Keyboard(app.game.canvas)
-	app.mouse = new Rogue.Mouse(app.game)
+	app.mouse = new Rogue.Mouse(app.game.canvas)
 	app.state =
 		setup: ->
 			assets = app.assets.core
