@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><script src="highlight.pack.js"></script><link rel="stylesheet" href="styles/monokai.css"><script>hljs.initHighlightingOnLoad();
+</script></head><body><ul><li><h3>Description</h3><p><p>Base class on which the game is build. Provides basic state management functionality.<br />Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties</p></p><h3>Code</h3><pre><code class="coffeescript">class Game</code></pre><ul><li><h3>Description</h3><p><p>Game constructor</p></p><h3>Code</h3><pre><code class="coffeescript">constructor: (@options={}) -&gt;
+    @canvas = document.getElementById(options.canvas) if @options.canvas?
+    if not @canvas?
+      @canvas = util.canvas()
+      document.body.appendChild(@canvas)
+    @canvas.tabIndex=0
+    @canvas.style.outline=&quot;none&quot;
+    @width = @canvas.width = @options.width ? 400
+    @height = @canvas.height = @options.height ? 300
+    @showFPS = @options.fps ? false
+    @canvas.x = @canvas.y = 0
+    @context = @canvas.getContext('2d')</code></pre></li><li><h3>Description</h3><p><p>Starts the game with a state</p></p><h3>Code</h3><pre><code class="coffeescript">start: (state) -&gt;
+    loading = @options.loadingScreen ? -&gt;
+    @switchState(state)</code></pre></li><li><h3>Description</h3><p><p>Switches the state to a new state, saving the old state in game.oldState</p></p><h3>Code</h3><pre><code class="coffeescript">switchState: (state) -&gt;
+    @e = []
+    @loop and @loop.stop()
+    @oldState = @state
+    @state = state
+    @state.setup.call(@state,@)
+    @loop = new GameLoop @,@showFPS
+    @loop.add [@state.update,@state.draw]
+    @loop.start()</code></pre></li><li><h3>Description</h3><p><p>Clears the canvas, can be run at the end of each frame.</p></p><h3>Code</h3><pre><code class="coffeescript">clear: -&gt;
+    @context.clearRect(0,0,@width,@height)</code></pre></li><li><h3>Description</h3><p><p>Finds entities with a given set of components that are children of the game</p></p><h3>Code</h3><pre><code class="coffeescript">find: (components,ex) -&gt;
+    find.call(@,components,ex)</code></pre></li></ul></li><li><h3>Description</h3><p><p>Gameloop class, used internally by Game, gets bound to game.loop<br />Runs functions in @call at 60fps</p></p><h3>Code</h3><pre><code class="coffeescript">class GameLoop
+  constructor: (@parent,@showFPS) -&gt;
+    @fps = 0
+    @averageFPS = new RollingAverage 20
+    @call = []
+  # Starts the loop, running each function in @call every tick
+  start: -&gt;
+    @paused = @stopped = false
+    firstTick = currentTick = lastTick = (new Date()).getTime()
+    Rogue.ticker.call window, @loop
+  # loop function that is called every tick
+  loop: =&gt;
+    @currentTick = (new Date()).getTime()
+    @dt = (@currentTick - @lastTick) or 17
+    @fps = @averageFPS.add(1000/@dt)
+    unless @stopped or @paused
+      if @dt &gt; 20 then @dt = 17
+      func.call(@parent.state,@parent,@dt/1000) for func in @call
+    unless @stopped
+      Rogue.ticker.call window, @loop
+    if @showFPS then @parent.context.fillText(&quot;fps:#{@fps} step:#{@dt}&quot;,10,10)
+    @lastTick = @currentTick
+  # Pauses the game loop, loop still runs, but no functions are called
+  pause: -&gt; 
+    @paused = true
+  # Stops the game loop
+  stop: -&gt;
+    @stopped = true
+
+  # adds a function or an array of functions to the loop
+  add: (func) -&gt;
+    @call = @call.concat func</code></pre><ul></ul></li><li><h3>Description</h3><p><p>Viewport class, most games will use this. <br />Expands the game world to be larger than the canvas.</p></p><h3>Code</h3><pre><code class="coffeescript">class ViewPort</code></pre><ul><li><h3>Description</h3><p><p>ViewPort constructor</p></p><h3>Code</h3><pre><code class="coffeescript">constructor: (@options) -&gt;
+    @parent = @options.parent
+    @canvas = @options.canvas or @parent.canvas or util.canvas()
+    @context = @canvas.getContext('2d')
+    @width = @options.width or @canvas.width
+    @height = @options.height or @canvas.height
+    @viewWidth = @options.viewWidth or @width
+    @viewHeight = @options.viewHeight or @height
+    @viewX = @options.viewX or 0
+    @viewY = @options.viewY or 0
+    @x = @options.x or 0
+    @y = @options.y or 0
+    @e = []
+    @updates = []</code></pre></li><li><h3>Description</h3><p><p>Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, <br />and position is drawn relative to the viewports position</p></p><h3>Code</h3><pre><code class="coffeescript">add: (entity) -&gt;
+    if entity.forEach
+      entity.forEach (obj) =&gt; @add obj
+    else
+      entity.parent = @
+      @e.push(entity)
+      @parent.e.push(entity)
+      if entity.name? then @[entity.name] = entity</code></pre></li><li><h3>Description</h3><p><p>Updates all entities within the viewport. The viewport update function should be called from your states update function</p></p><h3>Code</h3><pre><code class="coffeescript">update: (dt) -&gt;
+    for entity in @e
+      if @close(entity) and entity.update?
+        entity.update(dt)
+    func.call(@,dt) for func in @updates when func?
+
+  # Draws all entities within the viewport. The viewport draw function should be called from within your states draw function.
+  draw: -&gt;
+    @context.save()
+    @context.translate(-@viewX, -@viewY)
+    @context.beginPath()
+    @context.rect(@x+@viewX, @y+@viewY, @width, @height)
+    @context.clip()
+    for entity in @e
+      if @visible(entity) and entity.draw?
+        entity.draw()
+    @context.restore()</code></pre></li><li><h3>Description</h3><p><p>moves the view area by [x,y]</p></p><h3>Code</h3><pre><code class="coffeescript">move: (x,y) -&gt;
+    @viewX += x
+    @viewY += y
+    @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>moves the view area to [x,y]</p></p><h3>Code</h3><pre><code class="coffeescript">moveTo: (x,y) -&gt;
+    @viewX = x
+    @viewY = y
+    @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>Makes the view follow an entity, so that entity is always in the center</p></p><h3>Code</h3><pre><code class="coffeescript">follow: (entity) -&gt;
+    @viewX = entity.x - math.round(@width/2)
+    @viewY = entity.y - math.round(@height/2)
+    @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>prevents an entity from going outside of the view area.</p></p><h3>Code</h3><pre><code class="coffeescript">forceInside: (entity, buffer=0) -&gt;
+    w = @viewWidth; h = @viewHeight
+    if entity.x &lt; buffer then entity.x = buffer
+    if entity.y &lt; buffer then entity.y = buffer
+    if entity.x &gt; w-buffer then entity.x = w-buffer
+    if entity.y &gt; h-buffer then entity.y = h-buffer</code></pre></li><li><h3>Description</h3><p><p>used for checking the visibility of objects</p></p><h3>Code</h3><pre><code class="coffeescript">rect: -&gt;
+    width: @width
+    height: @height
+    x: @viewX
+    y: @viewY</code></pre></li><li><h3>Description</h3><p><p>Checks if an entity is currently visible.</p></p><h3>Code</h3><pre><code class="coffeescript">visible: (entity) -&gt;
+    collision.AABB entity.rect(), @rect()
+
+  keepInBounds: -&gt;
+    if @viewX &lt; 0 then @viewX = 0
+    if @viewY &lt; 0 then @viewY = 0
+    if @viewX+@width &gt; @viewWidth then @viewX = @viewWidth - @width
+    if @viewY+@height &gt; @viewHeight then @viewY = @viewHeight - @height
+
+  # @see Game.find
+  find: (components,ex) -&gt;
+    find.call(@,components,ex)
+
+  close: (entity) -&gt;
+    collision.AABB entity.rect(),
+      width: @width*2
+      height: @height*2
+      x:@viewX-@width/2
+      y:@viewY-@height/2</code></pre></li></ul></li><li><h3>Description</h3><p><p>Logging function. uses Rogue.loglevel to determine which logs should be displayed.<br />1: error<br />2: warning<br />3: info<br />4: debug<br />All logs with numbers less than the current log level will be displayed.</p></p><h3>Code</h3><pre><code class="coffeescript">log = (level, args...) -&gt;
+  return unless level &lt;= Rogue.loglevel
+  switch level
+    when 1 then func = console.error or console.log
+    when 2 then func = console.warn or console.log
+    when 3 then func = console.info or console.log
+    when 4 then func = console.debug or console.log
+  func.call(console,&quot;(Rogue)&quot;, args...)
+
+
+
+# Makes a new canvas
+# Maths
+# A faster round implementation
+# Globals</code></pre><ul></ul></li><li><h3>Description</h3><p><p>Calls a function when the DOM is ready</p></p><h3>Code</h3><pre><code class="coffeescript">Rogue.ready = (f) -&gt; document.addEventListener &quot;DOMContentLoaded&quot;, -&gt;
+  document.removeEventListener &quot;DOMContentLoaded&quot;, arguments.callee, false
+  f()</code></pre><ul></ul></li></ul></body></html>

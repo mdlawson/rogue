@@ -1,0 +1,26 @@
+doctype 5
+html(lang="en")
+  head
+    title= "Rogue Docs"
+    script(src='highlight.pack.js')
+    link(rel='stylesheet', href='styles/monokai.css')
+    script
+      hljs.initHighlightingOnLoad();
+
+  body
+    ul
+      each item in dox
+        li
+          h3= "Description"
+          p!= item.description.full
+          h3= "Code"
+          pre
+            code.coffeescript= item.code
+          ul
+            each child in item.children
+              li
+                h3= "Description"
+                p!= child.description.full
+                h3= "Code"
+                pre
+                  code.coffeescript= child.code

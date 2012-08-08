@@ -20,7 +20,6 @@ class Entity
     if @parent then @parent.e.push @
   # imports an array of components or a single component to the entity
   # @param [Array] imports array of components to import, or a string of a single component
-
   # The update function of the component, should be run each tick. This is done automatically by the viewport
   update: (dt) ->
     func.call(@,dt) for func in @updates when func?
