@@ -1,8 +1,8 @@
-
 # The main entity class. All entities are based on this.
-#
+# Components are imported though entity.components.add
+# or though the property "require"
 class Entity
-
+  # Entity constructor
   # @param [Object] options the attributes the new entity should have
   # @option options [Array] require components that should be imported on creation
   # @option options [Object] parent the parent of this entity, is set automatically when added to a ViewPort

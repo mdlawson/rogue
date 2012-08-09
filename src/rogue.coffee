@@ -1,6 +1,5 @@
 # Base class on which the game is built. Provides basic state management functionality.
 # Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties
-
 class Game
   # Game constructor
   # @param {Object} options game setup options
@@ -91,7 +90,7 @@ class GameLoop
     @call = @call.concat func
 
 
-#! A simple rolling average class, used internally for smoothing fps
+# A simple rolling average class, used internally for smoothing fps
 class RollingAverage
   constructor: (@size) ->
     @values = new Array @size
@@ -102,7 +101,6 @@ class RollingAverage
     @values.push value
     if @count < @size then @count++
     return ((@values.reduce (t, s) -> t+s)/@count) | 0
-#!
 
 # Viewport class, most games will use this. 
 # Expands the game world to be larger than the canvas.
@@ -246,7 +244,7 @@ log = (level, args...) ->
 
 
 
-#! Utility functions
+# Utility functions
 util =
   # Makes a new canvas
   canvas: -> document.createElement("canvas")
@@ -309,7 +307,6 @@ Rogue.ticker = window.requestAnimationFrame or
                window.oRequestAnimationFrame or
                window.msRequestAnimationFrame or
                (tick) -> window.setTimeout(tick, 1000/60)
-#!
 
 # Calls a function when the DOM is ready
 # @param {Function} f function to call
@@ -317,7 +314,6 @@ Rogue.ready = (f) -> document.addEventListener "DOMContentLoaded", ->
   document.removeEventListener "DOMContentLoaded", arguments.callee, false
   f()
 
-#!
 Rogue.log          = log
 Rogue.util         = util
 Rogue.math         = math
@@ -337,4 +333,3 @@ Rogue.Keyboard     = Keyboard
 Rogue.Mouse        = Mouse
 
 Rogue.loglevel = 4
-#!
