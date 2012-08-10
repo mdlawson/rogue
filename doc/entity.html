@@ -1,11 +1,1 @@
-<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><script src="highlight.pack.js"></script><link rel="stylesheet" href="styles/ir_black.css"><script>hljs.initHighlightingOnLoad();
-</script></head><body><ul><li><h3>Description</h3><p><p>The main entity class. All entities are based on this.<br />Components are imported though entity.components.add<br />or though the property "require"</p></p><h3>Code</h3><pre><code class="coffeescript">class Entity
-  </code></pre><ul><li><h3>Description</h3><p><p>Entity constructor</p></p><h3>Code</h3><pre><code class="coffeescript">constructor: (options) -&gt;
-  @updates=[]    
-  util.mixin @, options
-  #if @require then @components.add(@require)
-  
-  @ev         = new Eventer @
-  @components = new Importer Rogue.components,@
-  @components.add @require</code></pre></li><li><h3>Description</h3><p><p>imports an array of components or a single component to the entity</p></p><h3>Code</h3><pre><code class="coffeescript">update: (dt) -&gt;
-  func.call(@,dt) for func in @updates when func?</code></pre></li></ul></li><li><h3>Description</h3><p><p>d = collision.movesearch @,x,y<br />  if d then @x+=d[0]; @y+=d[1]<br />  return d</p></p><h3>Code</h3><pre><code class="coffeescript"></code></pre><ul></ul></li></ul></body></html>
+<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><script src="highlight.pack.js"></script><link rel="stylesheet" href="styles/ir_black.css"></head><body><ul></ul></body></html>

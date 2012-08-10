@@ -20,9 +20,9 @@ task 'build:doc', ->
     fn = jade.compile tmpl
     for file in files
       code = fs.readFileSync "src/#{file}.coffee", 'utf-8'
-      json = dox.parseComments code
-      html = fn({"dox":json,"file":file})
-      fs.writeFileSync "doc/#{file}.html",html
+      dox.parseComments code, {highlight:true}, (json) ->
+        html = fn({"dox":json,"file":file})
+        fs.writeFileSync "doc/#{file}.html",html
 
 task 'serve:test', ->
   test = require "./test/server"

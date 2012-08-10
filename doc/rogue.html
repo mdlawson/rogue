@@ -1,105 +1,104 @@
-<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><script src="highlight.pack.js"></script><link rel="stylesheet" href="styles/ir_black.css"><script>hljs.initHighlightingOnLoad();
-</script></head><body><ul><li><h3>Description</h3><p><p>Base class on which the game is built. Provides basic state management functionality.<br />Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties</p></p><h3>Code</h3><pre><code class="coffeescript">class Game
-  </code></pre><ul><li><h3>Description</h3><p><p>Game constructor</p></p><h3>Code</h3><pre><code class="coffeescript">constructor: (@options={}) -&gt;
-  @canvas = document.getElementById(options.canvas) if @options.canvas?
-  if not @canvas?
-    @canvas = util.canvas()
-    document.body.appendChild(@canvas)
-  @canvas.tabIndex=0
-  @canvas.style.outline=&quot;none&quot;
-  @width = @canvas.width = @options.width ? 400
-  @height = @canvas.height = @options.height ? 300
-  @showFPS = @options.fps ? false
-  @canvas.x = @canvas.y = 0
-  @context = @canvas.getContext('2d')</code></pre></li><li><h3>Description</h3><p><p>Starts the game with a state</p></p><h3>Code</h3><pre><code class="coffeescript">start: (state) -&gt;
-  loading = @options.loadingScreen ? -&gt;
-  @switchState(state)</code></pre></li><li><h3>Description</h3><p><p>Switches the state to a new state, saving the old state in game.oldState</p></p><h3>Code</h3><pre><code class="coffeescript">switchState: (state) -&gt;
-  @e = []
-  @loop and @loop.stop()
-  @oldState = @state
-  @state = state
-  @state.setup.call(@state,@)
-  @loop = new GameLoop @,@showFPS
-  @loop.add [@state.update,@state.draw]
-  @loop.start()</code></pre></li><li><h3>Description</h3><p><p>Clears the canvas, can be run at the end of each frame.</p></p><h3>Code</h3><pre><code class="coffeescript">clear: -&gt;
-  @context.clearRect(0,0,@width,@height)</code></pre></li><li><h3>Description</h3><p><p>Finds entities with a given set of components that are children of the game</p></p><h3>Code</h3><pre><code class="coffeescript">find: (components,ex) -&gt;
-  find.call(@,components,ex)</code></pre></li></ul></li><li><h3>Description</h3><p><p>Gameloop class, used internally by Game, gets bound to game.loop<br />Runs functions in @call at 60fps</p></p><h3>Code</h3><pre><code class="coffeescript">class GameLoop
-  constructor: (@parent,@showFPS) -&gt;
-    @fps = 0
-    @averageFPS = new RollingAverage 20
-    @call = []
-  # Starts the loop, running each function in @call every tick
-  start: -&gt;
-    @paused = @stopped = false
-    firstTick = currentTick = lastTick = (new Date()).getTime()
-    Rogue.ticker.call window, @loop
-  # loop function that is called every tick
-  loop: =&gt;
-    @currentTick = (new Date()).getTime()
-    @dt = (@currentTick - @lastTick) or 17
-    @fps = @averageFPS.add(1000/@dt)
-    unless @stopped or @paused
-      if @dt &gt; 20 then @dt = 17
-      func.call(@parent.state,@parent,@dt/1000) for func in @call
-    unless @stopped
-      Rogue.ticker.call window, @loop
-    if @showFPS then @parent.context.fillText(&quot;fps:#{@fps} step:#{@dt}&quot;,10,10)
-    @lastTick = @currentTick
-  # Pauses the game loop, loop still runs, but no functions are called
-  pause: -&gt; 
-    @paused = true
-  # Stops the game loop
-  stop: -&gt;
-    @stopped = true</code></pre><ul></ul></li><li><h3>Description</h3><p><p>Viewport class, most games will use this. <br />Expands the game world to be larger than the canvas.</p></p><h3>Code</h3><pre><code class="coffeescript">class ViewPort</code></pre><ul><li><h3>Description</h3><p><p>ViewPort constructor</p></p><h3>Code</h3><pre><code class="coffeescript">constructor: (@options) -&gt;
-  @parent = @options.parent
-  @canvas = @options.canvas or @parent.canvas or util.canvas()
-  @context = @canvas.getContext('2d')
-  @width = @options.width or @canvas.width
-  @height = @options.height or @canvas.height
-  @viewWidth = @options.viewWidth or @width
-  @viewHeight = @options.viewHeight or @height
-  @viewX = @options.viewX or 0
-  @viewY = @options.viewY or 0
-  @x = @options.x or 0
-  @y = @options.y or 0
-  @e = []
-  @updates = []</code></pre></li><li><h3>Description</h3><p><p>Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, <br />and position is drawn relative to the viewports position</p></p><h3>Code</h3><pre><code class="coffeescript">add: (entity) -&gt;
-  if entity.forEach
-    entity.forEach (obj) =&gt; @add obj
-  else
-    entity.parent = @
-    @e.push(entity)
-    @parent.e.push(entity)
-    if entity.name? then @[entity.name] = entity</code></pre></li><li><h3>Description</h3><p><p>Updates all entities within the viewport. The viewport update function should be called from your states update function</p></p><h3>Code</h3><pre><code class="coffeescript">update: (dt) -&gt;
-  for entity in @e
-    if @close(entity) and entity.update?
-      entity.update(dt)
-  func.call(@,dt) for func in @updates when func?</code></pre></li><li><h3>Description</h3><p><p>moves the view area by [x,y]</p></p><h3>Code</h3><pre><code class="coffeescript">move: (x,y) -&gt;
-  @viewX += x
-  @viewY += y
-  @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>moves the view area to [x,y]</p></p><h3>Code</h3><pre><code class="coffeescript">moveTo: (x,y) -&gt;
-  @viewX = x
-  @viewY = y
-  @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>Makes the view follow an entity, so that entity is always in the center</p></p><h3>Code</h3><pre><code class="coffeescript">follow: (entity) -&gt;
-  @viewX = entity.x - math.round(@width/2)
-  @viewY = entity.y - math.round(@height/2)
-  @keepInBounds()</code></pre></li><li><h3>Description</h3><p><p>prevents an entity from going outside of the view area.</p></p><h3>Code</h3><pre><code class="coffeescript">forceInside: (entity, buffer=0) -&gt;
-  w = @viewWidth; h = @viewHeight
-  if entity.x &lt; buffer then entity.x = buffer
-  if entity.y &lt; buffer then entity.y = buffer
-  if entity.x &gt; w-buffer then entity.x = w-buffer
-  if entity.y &gt; h-buffer then entity.y = h-buffer</code></pre></li><li><h3>Description</h3><p><p>used for checking the visibility of objects</p></p><h3>Code</h3><pre><code class="coffeescript">rect: -&gt;
-  width: @width
-  height: @height
-  x: @viewX
-  y: @viewY</code></pre></li><li><h3>Description</h3><p><p>Checks if an entity is currently visible.</p></p><h3>Code</h3><pre><code class="coffeescript">visible: (entity) -&gt;
-  collision.AABB entity.rect(), @rect()</code></pre></li></ul></li><li><h3>Description</h3><p><p>Logging function. uses Rogue.loglevel to determine which logs should be displayed.<br />1: error<br />2: warning<br />3: info<br />4: debug<br />All logs with numbers less than the current log level will be displayed.</p></p><h3>Code</h3><pre><code class="coffeescript">log = (level, args...) -&gt;
-  return unless level &lt;= Rogue.loglevel
-  switch level
-    when 1 then func = console.error or console.log
-    when 2 then func = console.warn or console.log
-    when 3 then func = console.info or console.log
-    when 4 then func = console.debug or console.log
-  func.call(console,&quot;(Rogue)&quot;, args...)</code></pre><ul></ul></li><li><h3>Description</h3><p><p>Calls a function when the DOM is ready</p></p><h3>Code</h3><pre><code class="coffeescript">Rogue.ready = (f) -&gt; document.addEventListener &quot;DOMContentLoaded&quot;, -&gt;
-  document.removeEventListener &quot;DOMContentLoaded&quot;, arguments.callee, false
-  f()</code></pre><ul></ul></li></ul></body></html>
+<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><link rel="stylesheet" href="coffee.css"></head><body><ul><li><h3>Description</h3><p><p>Base class on which the game is built. Provides basic state management functionality.<br />Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties</p></p><h3>Code</h3><pre><code class="coffee"><span class="k">class</span> <span class="nx">Game</span>
+  </code></pre><ul><li><h3>Description</h3><p><p>Game constructor</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">constructor: </span><span class="nf">(@options={}) -&gt;</span>
+  <span class="vi">@canvas = </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">canvas</span><span class="p">)</span> <span class="k">if</span> <span class="nx">@options</span><span class="p">.</span><span class="nx">canvas</span><span class="o">?</span>
+  <span class="k">if</span> <span class="o">not</span> <span class="nx">@canvas</span><span class="o">?</span>
+    <span class="vi">@canvas = </span><span class="nx">util</span><span class="p">.</span><span class="nx">canvas</span><span class="p">()</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">@canvas</span><span class="p">)</span>
+  <span class="nx">@canvas</span><span class="p">.</span><span class="nx">tabIndex</span><span class="o">=</span><span class="mi">0</span>
+  <span class="nx">@canvas</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">outline</span><span class="o">=</span><span class="s">&quot;none&quot;</span>
+  <span class="vi">@width = @canvas.width = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">width</span> <span class="o">?</span> <span class="mi">400</span>
+  <span class="vi">@height = @canvas.height = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">height</span> <span class="o">?</span> <span class="mi">300</span>
+  <span class="vi">@showFPS = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">fps</span> <span class="o">?</span> <span class="kc">false</span>
+  <span class="vi">@canvas.x = @canvas.y = </span><span class="mi">0</span>
+  <span class="vi">@context = </span><span class="nx">@canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s">&#39;2d&#39;</span><span class="p">)</span></code></pre></li><li><h3>Description</h3><p><p>Starts the game with a state</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">start: </span><span class="nf">(state) -&gt;</span>
+  <span class="nv">loading = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">loadingScreen</span> <span class="o">?</span> <span class="o">-&gt;</span>
+  <span class="nx">@switchState</span><span class="p">(</span><span class="nx">state</span><span class="p">)</span></code></pre></li><li><h3>Description</h3><p><p>Switches the state to a new state, saving the old state in game.oldState</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">switchState: </span><span class="nf">(state) -&gt;</span>
+  <span class="vi">@e = </span><span class="p">[]</span>
+  <span class="nx">@loop</span> <span class="o">and</span> <span class="nx">@loop</span><span class="p">.</span><span class="nx">stop</span><span class="p">()</span>
+  <span class="vi">@oldState = </span><span class="nx">@state</span>
+  <span class="vi">@state = </span><span class="nx">state</span>
+  <span class="nx">@state</span><span class="p">.</span><span class="nx">setup</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">@state</span><span class="p">,</span><span class="nx">@</span><span class="p">)</span>
+  <span class="vi">@loop = </span><span class="k">new</span> <span class="nx">GameLoop</span> <span class="nx">@</span><span class="p">,</span><span class="nx">@showFPS</span>
+  <span class="nx">@loop</span><span class="p">.</span><span class="nx">add</span> <span class="p">[</span><span class="nx">@state</span><span class="p">.</span><span class="nx">update</span><span class="p">,</span><span class="nx">@state</span><span class="p">.</span><span class="nx">draw</span><span class="p">]</span>
+  <span class="nx">@loop</span><span class="p">.</span><span class="nx">start</span><span class="p">()</span></code></pre></li><li><h3>Description</h3><p><p>Clears the canvas, can be run at the end of each frame.</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">clear: </span><span class="o">-&gt;</span>
+  <span class="nx">@context</span><span class="p">.</span><span class="nx">clearRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nx">@width</span><span class="p">,</span><span class="nx">@height</span><span class="p">)</span></code></pre></li><li><h3>Description</h3><p><p>Finds entities with a given set of components that are children of the game</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">find: </span><span class="nf">(components,ex) -&gt;</span>
+  <span class="nx">find</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">@</span><span class="p">,</span><span class="nx">components</span><span class="p">,</span><span class="nx">ex</span><span class="p">)</span></code></pre></li></ul></li><li><h3>Description</h3><p><p>Gameloop class, used internally by Game, gets bound to game.loop<br />Runs functions in @call at 60fps</p></p><h3>Code</h3><pre><code class="coffee"><span class="k">class</span> <span class="nx">GameLoop</span>
+  <span class="nv">constructor: </span><span class="nf">(@parent,@showFPS) -&gt;</span>
+    <span class="vi">@fps = </span><span class="mi">0</span>
+    <span class="vi">@averageFPS = </span><span class="k">new</span> <span class="nx">RollingAverage</span> <span class="mi">20</span>
+    <span class="vi">@call = </span><span class="p">[]</span>
+  <span class="c1"># Starts the loop, running each function in @call every tick</span>
+  <span class="nv">start: </span><span class="o">-&gt;</span>
+    <span class="vi">@paused = @stopped = </span><span class="kc">false</span>
+    <span class="nv">firstTick = currentTick = lastTick = </span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()).</span><span class="nx">getTime</span><span class="p">()</span>
+    <span class="nx">Rogue</span><span class="p">.</span><span class="nx">ticker</span><span class="p">.</span><span class="nx">call</span> <span class="nb">window</span><span class="p">,</span> <span class="nx">@loop</span>
+  <span class="c1"># loop function that is called every tick</span>
+  <span class="nv">loop: </span><span class="o">=&gt;</span>
+    <span class="vi">@currentTick = </span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">()).</span><span class="nx">getTime</span><span class="p">()</span>
+    <span class="vi">@dt = </span><span class="p">(</span><span class="nx">@currentTick</span> <span class="o">-</span> <span class="nx">@lastTick</span><span class="p">)</span> <span class="o">or</span> <span class="mi">17</span>
+    <span class="vi">@fps = </span><span class="nx">@averageFPS</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="nx">@dt</span><span class="p">)</span>
+    <span class="nx">unless</span> <span class="nx">@stopped</span> <span class="o">or</span> <span class="nx">@paused</span>
+      <span class="k">if</span> <span class="nx">@dt</span> <span class="o">&gt;</span> <span class="mi">20</span> <span class="k">then</span> <span class="vi">@dt = </span><span class="mi">17</span>
+      <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">@parent</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span><span class="nx">@parent</span><span class="p">,</span><span class="nx">@dt</span><span class="o">/</span><span class="mi">1000</span><span class="p">)</span> <span class="k">for</span> <span class="nx">func</span> <span class="k">in</span> <span class="nx">@call</span>
+    <span class="nx">unless</span> <span class="nx">@stopped</span>
+      <span class="nx">Rogue</span><span class="p">.</span><span class="nx">ticker</span><span class="p">.</span><span class="nx">call</span> <span class="nb">window</span><span class="p">,</span> <span class="nx">@loop</span>
+    <span class="k">if</span> <span class="nx">@showFPS</span> <span class="k">then</span> <span class="nx">@parent</span><span class="p">.</span><span class="nx">context</span><span class="p">.</span><span class="nx">fillText</span><span class="p">(</span><span class="s">&quot;fps:</span><span class="si">#{</span><span class="nx">@fps</span><span class="si">}</span><span class="s"> step:</span><span class="si">#{</span><span class="nx">@dt</span><span class="si">}</span><span class="s">&quot;</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="vi">@lastTick = </span><span class="nx">@currentTick</span>
+  <span class="c1"># Pauses the game loop, loop still runs, but no functions are called</span>
+  <span class="nv">pause: </span><span class="o">-&gt;</span> 
+    <span class="vi">@paused = </span><span class="kc">true</span>
+  <span class="c1"># Stops the game loop</span>
+  <span class="nv">stop: </span><span class="o">-&gt;</span>
+    <span class="vi">@stopped = </span><span class="kc">true</span></code></pre><ul></ul></li><li><h3>Description</h3><p><p>Viewport class, most games will use this. <br />Expands the game world to be larger than the canvas.</p></p><h3>Code</h3><pre><code class="coffee"><span class="k">class</span> <span class="nx">ViewPort</span></code></pre><ul><li><h3>Description</h3><p><p>ViewPort constructor</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">constructor: </span><span class="nf">(@options) -&gt;</span>
+  <span class="vi">@parent = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">parent</span>
+  <span class="vi">@canvas = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">canvas</span> <span class="o">or</span> <span class="nx">@parent</span><span class="p">.</span><span class="nx">canvas</span> <span class="o">or</span> <span class="nx">util</span><span class="p">.</span><span class="nx">canvas</span><span class="p">()</span>
+  <span class="vi">@context = </span><span class="nx">@canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s">&#39;2d&#39;</span><span class="p">)</span>
+  <span class="vi">@width = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">width</span> <span class="o">or</span> <span class="nx">@canvas</span><span class="p">.</span><span class="nx">width</span>
+  <span class="vi">@height = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">height</span> <span class="o">or</span> <span class="nx">@canvas</span><span class="p">.</span><span class="nx">height</span>
+  <span class="vi">@viewWidth = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">viewWidth</span> <span class="o">or</span> <span class="nx">@width</span>
+  <span class="vi">@viewHeight = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">viewHeight</span> <span class="o">or</span> <span class="nx">@height</span>
+  <span class="vi">@viewX = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">viewX</span> <span class="o">or</span> <span class="mi">0</span>
+  <span class="vi">@viewY = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">viewY</span> <span class="o">or</span> <span class="mi">0</span>
+  <span class="vi">@x = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">x</span> <span class="o">or</span> <span class="mi">0</span>
+  <span class="vi">@y = </span><span class="nx">@options</span><span class="p">.</span><span class="nx">y</span> <span class="o">or</span> <span class="mi">0</span>
+  <span class="vi">@e = </span><span class="p">[]</span>
+  <span class="vi">@updates = </span><span class="p">[]</span></code></pre></li><li><h3>Description</h3><p><p>Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, <br />and position is drawn relative to the viewports position</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">add: </span><span class="nf">(entity) -&gt;</span>
+  <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">forEach</span>
+    <span class="nx">entity</span><span class="p">.</span><span class="nx">forEach</span> <span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">@add</span> <span class="nx">obj</span>
+  <span class="k">else</span>
+    <span class="nv">entity.parent = </span><span class="nx">@</span>
+    <span class="nx">@e</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">entity</span><span class="p">)</span>
+    <span class="nx">@parent</span><span class="p">.</span><span class="nx">e</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">entity</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">name</span><span class="o">?</span> <span class="k">then</span> <span class="nx">@</span><span class="p">[</span><span class="nx">entity</span><span class="p">.</span><span class="nx">name</span><span class="p">]</span> <span class="o">=</span> <span class="nx">entity</span></code></pre></li><li><h3>Description</h3><p><p>Updates all entities within the viewport. The viewport update function should be called from your states update function</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">update: </span><span class="nf">(dt) -&gt;</span>
+  <span class="k">for</span> <span class="nx">entity</span> <span class="k">in</span> <span class="nx">@e</span>
+    <span class="k">if</span> <span class="nx">@close</span><span class="p">(</span><span class="nx">entity</span><span class="p">)</span> <span class="o">and</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">update</span><span class="o">?</span>
+      <span class="nx">entity</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">dt</span><span class="p">)</span>
+  <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">@</span><span class="p">,</span><span class="nx">dt</span><span class="p">)</span> <span class="k">for</span> <span class="nx">func</span> <span class="k">in</span> <span class="nx">@updates</span> <span class="k">when</span> <span class="nx">func</span><span class="o">?</span></code></pre></li><li><h3>Description</h3><p><p>moves the view area by [x,y]</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">move: </span><span class="nf">(x,y) -&gt;</span>
+  <span class="nx">@viewX</span> <span class="o">+=</span> <span class="nx">x</span>
+  <span class="nx">@viewY</span> <span class="o">+=</span> <span class="nx">y</span>
+  <span class="nx">@keepInBounds</span><span class="p">()</span></code></pre></li><li><h3>Description</h3><p><p>moves the view area to [x,y]</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">moveTo: </span><span class="nf">(x,y) -&gt;</span>
+  <span class="vi">@viewX = </span><span class="nx">x</span>
+  <span class="vi">@viewY = </span><span class="nx">y</span>
+  <span class="nx">@keepInBounds</span><span class="p">()</span></code></pre></li><li><h3>Description</h3><p><p>Makes the view follow an entity, so that entity is always in the center</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">follow: </span><span class="nf">(entity) -&gt;</span>
+  <span class="vi">@viewX = </span><span class="nx">entity</span><span class="p">.</span><span class="nx">x</span> <span class="o">-</span> <span class="nx">math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">@width</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+  <span class="vi">@viewY = </span><span class="nx">entity</span><span class="p">.</span><span class="nx">y</span> <span class="o">-</span> <span class="nx">math</span><span class="p">.</span><span class="nx">round</span><span class="p">(</span><span class="nx">@height</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+  <span class="nx">@keepInBounds</span><span class="p">()</span></code></pre></li><li><h3>Description</h3><p><p>prevents an entity from going outside of the view area.</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">forceInside: </span><span class="nf">(entity, buffer=0) -&gt;</span>
+  <span class="nv">w = </span><span class="nx">@viewWidth</span><span class="p">;</span> <span class="nv">h = </span><span class="nx">@viewHeight</span>
+  <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">x</span> <span class="o">&lt;</span> <span class="nx">buffer</span> <span class="k">then</span> <span class="nv">entity.x = </span><span class="nx">buffer</span>
+  <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">y</span> <span class="o">&lt;</span> <span class="nx">buffer</span> <span class="k">then</span> <span class="nv">entity.y = </span><span class="nx">buffer</span>
+  <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">x</span> <span class="o">&gt;</span> <span class="nx">w</span><span class="o">-</span><span class="nx">buffer</span> <span class="k">then</span> <span class="nv">entity.x = </span><span class="nx">w</span><span class="o">-</span><span class="nx">buffer</span>
+  <span class="k">if</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">y</span> <span class="o">&gt;</span> <span class="nx">h</span><span class="o">-</span><span class="nx">buffer</span> <span class="k">then</span> <span class="nv">entity.y = </span><span class="nx">h</span><span class="o">-</span><span class="nx">buffer</span></code></pre></li><li><h3>Description</h3><p><p>used for checking the visibility of objects</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">rect: </span><span class="o">-&gt;</span>
+  <span class="nv">width: </span><span class="nx">@width</span>
+  <span class="nv">height: </span><span class="nx">@height</span>
+  <span class="nv">x: </span><span class="nx">@viewX</span>
+  <span class="nv">y: </span><span class="nx">@viewY</span></code></pre></li><li><h3>Description</h3><p><p>Checks if an entity is currently visible.</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">visible: </span><span class="nf">(entity) -&gt;</span>
+  <span class="nx">collision</span><span class="p">.</span><span class="nx">AABB</span> <span class="nx">entity</span><span class="p">.</span><span class="nx">rect</span><span class="p">(),</span> <span class="nx">@rect</span><span class="p">()</span></code></pre></li></ul></li><li><h3>Description</h3><p><p>Logging function. uses Rogue.loglevel to determine which logs should be displayed.<br />1: error<br />2: warning<br />3: info<br />4: debug<br />All logs with numbers less than the current log level will be displayed.</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">log = </span><span class="nf">(level, args...) -&gt;</span>
+  <span class="k">return</span> <span class="nx">unless</span> <span class="nx">level</span> <span class="o">&lt;=</span> <span class="nx">Rogue</span><span class="p">.</span><span class="nx">loglevel</span>
+  <span class="k">switch</span> <span class="nx">level</span>
+    <span class="k">when</span> <span class="mi">1</span> <span class="k">then</span> <span class="nv">func = </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span> <span class="o">or</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span>
+    <span class="k">when</span> <span class="mi">2</span> <span class="k">then</span> <span class="nv">func = </span><span class="nx">console</span><span class="p">.</span><span class="nx">warn</span> <span class="o">or</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span>
+    <span class="k">when</span> <span class="mi">3</span> <span class="k">then</span> <span class="nv">func = </span><span class="nx">console</span><span class="p">.</span><span class="nx">info</span> <span class="o">or</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span>
+    <span class="k">when</span> <span class="mi">4</span> <span class="k">then</span> <span class="nv">func = </span><span class="nx">console</span><span class="p">.</span><span class="nx">debug</span> <span class="o">or</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span>
+  <span class="nx">func</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">console</span><span class="p">,</span><span class="s">&quot;(Rogue)&quot;</span><span class="p">,</span> <span class="nx">args</span><span class="p">...)</span></code></pre><ul></ul></li><li><h3>Description</h3><p><p>Calls a function when the DOM is ready</p></p><h3>Code</h3><pre><code class="coffee"><span class="nv">Rogue.ready = </span><span class="nf">(f) -&gt;</span> <span class="nb">document</span><span class="p">.</span><span class="nx">addEventListener</span> <span class="s">&quot;DOMContentLoaded&quot;</span><span class="p">,</span> <span class="o">-&gt;</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">removeEventListener</span> <span class="s">&quot;DOMContentLoaded&quot;</span><span class="p">,</span> <span class="nx">arguments</span><span class="p">.</span><span class="nx">callee</span><span class="p">,</span> <span class="kc">false</span>
+  <span class="nx">f</span><span class="p">()</span></code></pre><ul></ul></li></ul></body></html>

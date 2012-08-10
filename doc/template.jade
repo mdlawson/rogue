@@ -2,10 +2,7 @@ doctype 5
 html(lang="en")
   head
     title= "Rogue Docs"
-    script(src='highlight.pack.js')
-    link(rel='stylesheet', href='styles/ir_black.css')
-    script
-      hljs.initHighlightingOnLoad();
+    link(rel='stylesheet', href='coffee.css')
 
   body
     ul
@@ -15,7 +12,7 @@ html(lang="en")
           p!= item.description.full
           h3= "Code"
           pre
-            code.coffeescript= item.code
+            code.coffee!= item.code
           ul
             each child in item.children
               li
@@ -23,4 +20,4 @@ html(lang="en")
                 p!= child.description.full
                 h3= "Code"
                 pre
-                  code.coffeescript= child.code
+                  code.coffee!= child.code
