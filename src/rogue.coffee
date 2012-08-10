@@ -329,6 +329,7 @@ Rogue.Animation    = Animation
 Rogue.ViewPort     = ViewPort
 Rogue.components   = c
 Rogue.Entity       = Entity
+Rogue.Factory      = Factory
 Rogue.Keyboard     = Keyboard
 Rogue.Mouse        = Mouse
 

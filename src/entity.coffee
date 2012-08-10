@@ -13,7 +13,7 @@ class Entity
     
     @ev         = new Eventer @
     @components = new Importer Rogue.components,@
-    @components.add @require
+    if @require then @components.add @require
 
     delete @require
 
@@ -44,6 +44,30 @@ class Importer
           delete @dest[key]
       if @[imp].onremove then @[imp].onremove.call(@dest)
       delete @[imp]
+
+class Factory
+  constructor: (options) ->
+    @hanger = []
+    @entity = options.entity or Rogue.Entity
+    @opts = options.options or {}
+    @initial = options.initial
+    for i in [0...@initial]
+      @hanger.push @create()
+      
+  deploy: (num) ->
+    if @hanger.length > 0
+      e = @hanger.pop()
+    else 
+      e = @create()
+
+  create: ->
+    ent = new @entity @opts
+    ent.factory = @
+    ent.return = ->
+      @factory.hanger.push @
+      util.mixin @, @factory.opts
+    ent
+
 
 c = {}
 

@@ -39,6 +39,12 @@ task 'watch', ->
   invoke 'serve:test'
   invoke 'serve:doc'
 
+task 'watch:src', ->
+  watch 'src/*.coffee', ->
+    invoke 'build:src'
+  watch 'test/src/*.coffee', -> invoke 'build:test'
+  invoke 'serve:test'
+  
 task 'build', ->
   invoke 'build:src'
   invoke 'build:doc'
