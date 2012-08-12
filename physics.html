@@ -1,0 +1,72 @@
+<!DOCTYPE html><html><head><title>physics</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a></li><li class="nav-file"><a href="assets.html">assets</a></li><li class="nav-file"><a href="entity.html">entity</a></li><li class="nav-file"><a href="physics.html">physics</a></li><li class="nav-header"><a href="#intergrate">intergrate</a></li><li class="nav-header"><a href="#"></a></li><li class="nav-header"><a href="#c.physics">c.physics</a></li><li><a href="#c.physics.still">still</a></li><li class="nav-header"><a href="#b.gravity">b.gravity</a></li><li class="nav-header"><a href="#b.collide">b.collide</a></li><li class="nav-file"><a href="tiles.html">tiles</a></li><li class="nav-file"><a href="input.html">input</a></li><li class="nav-file"><a href="collision.html">collision</a></li><li class="nav-file"><a href="rogue.html">rogue</a></li></ul></div><div class="container"><h1>physics</h1><dl class="doc"><dt id="physics.intergrate">physics.intergrate</dt><dd><p><p>The physics integration function. It is given and entity, e, and a change in time, dt,
+and should modify the entities position and velocity based on its acceleration in that time period.
+uses by default a Euler variation, and the default physics component runs it 8 times a tick, which gives reasonable 
+accuracy/performance </p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>e </b><code>Entity</code><span>	Entity to integrate upon</span></p><p> <b>dt </b><code>Float</code><span>	change in time since last integration.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">physics.intergrate = intergrate = (e,dt) ->
+  if e.still() then return
+  d = []
+  v.scale e.acc, 10000/e.mass, e.acc
+  v.add (v.scale e.vel, dt, []),(v.scale e.acc, 0.5*dt*dt, []), d
+  v.add e.vel, (v.scale e.acc, dt, []), e.vel
+  e.move(d[0],d[1])
+  #e.x += d[0]; e.y += d[1]
+  v.scale e.vel, 1-(e.friction/5), e.vel
+  e.acc = [0,0]</code></pre><dl class="doc"></dl></dd><dt id=""></dt><dd><p><p>2D Vector maths functions, where a and b are 2 input vectors as arrays, 
+and c is the destination vector of the operation where applicable.<br>I am aware they are utterly unreadable. 
+They are accessible from Rogue.math.vector, though it recommended to bind them to a global if you are using them.</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">v =
+  add:    (a,b,c) -> c[0]=a[0]+b[0]; c[1]=a[1]+b[1]; c
+  sub:    (a,b,c) -> c[0]=a[0]-b[0]; c[1]=a[1]-b[1]; c
+  dir:    (a,b,c) -> dx=b[0]-a[0]; dy=b[1]-a[1]; l = 1/(sqrt dx*dx+dy*dy); c[0] = dx*l; c[1] = dy*l; c
+  scale:  (a,b,c) -> c[0]=a[0]*b; c[1]= a[1]*b; c
+  proj:   (a,b,c) -> dpb=(a[0]*b[0]+a[1]*b[1])/(b[0]*b[0]+b[1]*b[1]); c[0]=dpb*b[0]; c[1]=dpb*b[1]; c
+  dot:    (a,b)   -> a[0]*b[0]+a[1]*b[1]
+  cross:  (a,b)   -> (a[0]*b[0])-(a[1]*b[1])
+  dist:   (a,b)   -> dx=b[0]-a[0];dy=b[1]-a[1]; sqrt dx*dx+dy*dy
+  distSq: (a,b)   -> dx=b[0]-a[0];dy=b[1]-a[1]; dx*dx+dy*dy
+  norm:   (a,c)   -> m = sqrt a[0]*a[0]+a[1]*a[1]; c[0]=a[0]/m; c[1]=a[1]/m; c
+  clone:  (a,c)   -> c = a[..]
+  neg:    (a,c)   -> c[0]=-a[0]; c[1]=-a[1] c
+  mag:    (a)     -> sqrt a[0]*a[0]+a[1]*a[1]
+  magSq:  (a)     -> a[0]*a[0]+a[1]*a[1]</code></pre><dl class="doc"></dl></dd><dt id="c.physics">class c.physics</dt><dd><p><p>Physics component. Adds physics integration to an entities updates. Adds support for &quot;behaviors&quot;, which are like components added to entity.behavior, and their
+properties aren&#39;t mixed in. The main purpose of a behavior is to modify entity acceleration or velocity each tick. this can be done though a behaviors &quot;run&quot; function which is called
+each tick with the entity as the context. Additional behaviors can be made available to entities by attaching them to Rogue.physics.behavior
+
+</p>
+<p>Entities with the physics component have velocity, <code>vel</code>, acceleration, <code>acc</code>, friction, and mass.
+They also have an integration function that runs each tick.</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class c.physics
+  onadd: ->
+    @components.add ["move","collide"]
+    @behavior = new Importer Rogue.physics.behavior,@,false
+    @behavior.add "collide"
+    @updates.push (dt) ->
+      behave.run.call(@,dt) for name,behave of @behavior when behave.run?
+      @intergrate dt
+    @vel ?= [0,0]
+    @acc ?= [0,0]
+    @old = {}
+    @friction ?= 0
+    @mass ?= 1
+    @solid = false
+  intergrate: (dt) ->
+    i = 0
+    while i++ < 8 then intergrate(@,dt/8)
+  </code></pre><dl class="doc"><dt id="c.physics.still">still()</dt><dd><p><p>Useful for checking if an entity is still.</p>
+</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Bool</code><span>	returns true if entity has no velocity and acceleration.</span></dd></dl><pre class="prettyprint"><code class="language-coffee">still: -> @vel[0] is 0 and @vel[1] is 0 and @acc[0] is 0 and @acc[1] is 0</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="b.gravity">class b.gravity</dt><dd><p><p>Gravity behavior
+Applies a downward force of 9.8 each tick</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class b.gravity
+  run: ->
+    if @acc[1] < 9.8 
+      @acc[1]++
+      @acc[1] = 9.8 if @acc[1] > 9.8</code></pre><dl class="doc"></dl></dd><dt id="b.collide">class b.collide</dt><dd><p><p>Collision behavior. 
+sets velocity in the collision direction to 0 on collision</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class b.collide
+  responce = (col) ->
+    if col.e2.solid
+      if col.dir is "left" or col.dir is "right" then @vel[0] = 0 else @vel[1] = 0
+  onadd: ->
+    @ev.on "hit", responce
+  onremove: ->
+    @ev.off "hit", responce</code></pre><dl class="doc"></dl></dd></dl></div></body></html>
