@@ -9,9 +9,10 @@
   }, 
   "main" : "./lib/rogue.js",
   "devDependencies": {
-	"express": "3.x",
-	"coffee-script": "1.3.x",
-	"jade": "0.27.x",
-	"flour": "0.2.x"
+    "express": "3.x",
+    "coffee-script": "1.3.x",
+    "jade": "0.27.x",
+    "stylus": "0.x",
+    "flour": "0.2.x"
   }
 }
