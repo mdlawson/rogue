@@ -1,1 +1,131 @@
-<!DOCTYPE html><html lang="en"><head><title>Rogue Docs</title><script src="highlight.pack.js"></script><link rel="stylesheet" href="styles/ir_black.css"></head><body><ul></ul></body></html>
+<!DOCTYPE html><html><head><title>assets</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a></li><li class="nav-file"><a href="assets.html">assets</a></li><li class="nav-header"><a href="#AssetManager">AssetManager</a></li><li><a href="#AssetManager.constructor">constructor</a></li><li><a href="#AssetManager.download">download</a></li><li><a href="#AssetManager.downloadAll">downloadAll</a></li><li><a href="#AssetManager.on">on</a></li><li class="nav-header"><a href="#SpriteSheet">SpriteSheet</a></li><li><a href="#SpriteSheet.slice">slice</a></li><li class="nav-header"><a href="#Animation">Animation</a></li><li><a href="#Animation.constructor">constructor</a></li><li><a href="#Animation.next">next</a></li><li class="nav-file"><a href="entity.html">entity</a></li><li class="nav-file"><a href="physics.html">physics</a></li><li class="nav-file"><a href="tiles.html">tiles</a></li><li class="nav-file"><a href="input.html">input</a></li><li class="nav-file"><a href="collision.html">collision</a></li><li class="nav-file"><a href="rogue.html">rogue</a></li></ul></div><div class="container"><h1>assets</h1><dl class="doc"><dt id="AssetManager">class AssetManager</dt><dd><p><p>Asset manager. Helps download and organize all your asset files.
+Is initially created with a manifest that must describe all your game assets.
+Example:
+</p>
+<pre><code>assets = new Rogue.AssetManager({
+  baseUrl: &quot;&quot;
+  packs:
+    core: [
+      {name:&quot;bg1&quot;,src:&quot;img/b1.png&quot;}
+      {name:&quot;bg2&quot;,src:&quot;img/b2.png&quot;}
+      {name:&quot;red&quot;,src:&quot;img/1.png&quot;}
+      {name:&quot;blue&quot;,src:&quot;img/2.png&quot;}
+      {name:&quot;jump&quot;,src:&quot;sound/jump.ogg&quot;,alt:&quot;sound/jump.mp3&quot;}
+    ]
+  preload: false
+})
+# &quot;img/b1.png&quot; is now available as a canvas as assets.core.bg1
+# &quot;sound/jump.ogg&quot;/&quot;sound/jump.mp3&quot; is now available as an Audio() element as assets.core.jump
+# By having sounds as both ogg and mp3 we can cover all browsers.</code></pre>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class AssetManager
+  </code></pre><dl class="doc"><dt id="AssetManager.constructor">constructor()</dt><dd><p><p>AssetManager constructor</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>manifest </b><code>Object</code><span>	a manifest declares &quot;packs&quot; of assets. See above example</span></p><ul></ul><li><b>baseUrl </b><code>String</code><span>	this will be added to all source urls</span></li><li><b>packs </b><code>Object</code><span>	</span></li><li><b>preload </b><code>Bool</code><span>	note: If preload is set to true, and your assets load really fast, callbacks may not fire.</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (manifest) ->
+  @callbacks = {load:{},complete:{},error:{}}
+  @base = manifest.baseUrl or ""
+  @packs = {}
+  @total = @complete = 0
+  for name,contents of manifest.packs
+    @packs[name] = contents
+    @total += contents.length
+  manifest.preload and @downloadAll()</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.download">download()</dt><dd><p><p>Download a pack manually from the manifest. If it has already been downloaded, it will not be downloaded again</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>pack </b><code>String</code><span>	name of pack to download</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">download: (pack) ->
+  that = @
+  contents = @packs[pack]
+  unless contents?
+    log 2, "Pack #{pack} does not exist"
+    return false
+  unless contents.loaded is contents.length
+    contents.loaded = 0
+    for asset in contents
+      ext = asset.src.split(".").pop()
+      asset.src = @base+asset.src
+      asset.pack = pack
+      for key,value of filetypes
+        if ext in value
+          asset.type = key
+      unless asset.type?
+        log 2,"Unknown asset type for extension: #{ext}"
+        return false
+      switch asset.type
+        when "image"
+          data = new Image()
+          data.a = asset
+          data.onload = ->
+            canvas = util.imgToCanvas @
+            a = util.mixin canvas,@a
+            that.loaded a
+          data.onerror = -> callback.call(that,@a,false)
+          data.src = asset.src
+        when "sound"
+          asset.alt = @base+asset.alt
+          data = new Audio()
+          data.preload = "none"
+          asset = util.mixin data,asset
+          unless data.canPlayType codecs[ext] then asset.src = asset.alt
+          asset.onerror = -> callback.call(that,asset,false)
+          asset.addEventListener 'canplaythrough', -> that.loaded @
+          asset.load()</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.downloadAll">downloadAll()</dt><dd><p><p>Download all packs
+It&#39;s probably preferable to set up callbacks and then downloadAll() rather than <code>preload: true</code> and hope for the best
+unless your assets are really small. Callbacks can be set up so that the game can start running as soon as a minimum of assets
+has been downloaded.</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">downloadAll: (eee) ->
+  @download key for key,val of @packs</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.on">on()</dt><dd><p><p>Set up callbacks. You can have callbacks on the events &quot;load&quot;,&quot;complete&quot; and &quot;error&quot; for each of your packs,
+or set pack to &quot;all&quot; to run for all packs. Yes that does mean you can&#39;t have callbacks on a pack named all. That&#39;s a silly name for a pack anyway
+callbacks on the &quot;load&quot; event get passed the current percentage</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>e </b><code>String</code><span>	an event to call on. Must be one of &quot;load&quot;,&quot;complete&quot; or &quot;error&quot;</span></p><p> <b>pack </b><code>String</code><span>	the name of the pack you want the event to apply to</span></p><p> <b>fn </b><code>Function</code><span>	the callback function</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">on: (e,pack,fn) ->
+  if e in ["load","complete","error"]
+    if pack is "all"
+      @["on"+e] ?= []
+      @["on"+e].push fn
+    else 
+      @callbacks[e][pack] ?= []
+      @callbacks[e][pack].push fn</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="SpriteSheet">class SpriteSheet</dt><dd><p><p>SpriteSheet class. The spritesheet class takes an image and a resolution, and chops it down into chunks of that resolution,
+making an array-like object. </p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>image </b><code>Canvas</code><span>	image to slice</span></li><li><b>res </b><code>Array</code><span>	resolution of resultant images, in the form [x,y]</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">class SpriteSheet
+  constructor: (@options) ->
+    @img = @options.image
+    @res = @options.res or [32,32]
+    @length = 0
+    for x in [0...@img.width] by @res[0]
+      for y in [0...@img.height] by @res[1]
+        c = util.canvas()
+        cx = c.getContext "2d"
+        c.width = @res[0]
+        c.height = @res[1]
+        cx.drawImage(@img,x,y,c.width,c.height,0,0,c.width,c.height)
+        this[@length] = c
+        @length++
+  </code></pre><dl class="doc"><dt id="SpriteSheet.slice">slice()</dt><dd><p><p>Slices a portion of this spritesheet</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>start </b><code>Int</code><span>	position to start slice at</span></p><p> <b>end </b><code>Int</code><span>	position to end slice at</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	an array of images in the range</span></dd></dl><pre class="prettyprint"><code class="language-coffee">slice: (start, end) ->
+  return Array::slice.call(this, start, end);</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="Animation">class Animation</dt><dd><p><p>Animation class. from a given spritesheet, produces an animation instance with a <code>next()</code> function that should
+be ran every tick to advance the animation state.</p>
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class Animation
+  </code></pre><dl class="doc"><dt id="Animation.constructor">constructor()</dt><dd><p><p>Animation constructor</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>spritesheet </b><code>Object</code><span>	an array or array-like object that contains animation frames</span></li><li><b>speed </b><code>Int</code><span>	the number of ticks between each frame of the animation. defaults to 6, or 10fps</span></li><li><b>start </b><code>Int</code><span>	the frame of the animation to start on. defaults to 0</span></li><li><b>loop </b><code>Bool</code><span>	should the animation loop?</span></li><li><b>bounce </b><code>Bool</code><span>	should the animation reverse instead of loop?</span></li><li><b>onFinish </b><code>Function</code><span>	callback on animation end</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (@options) ->
+  @sprites = @options.spritesheet
+  @speed = @options.speed or 6
+  @i = @options.start or 0
+  @t = 0
+  @loop = @options.loop or true
+  @bounce = @options.bounce or false
+  @finished = false
+  @onFinish = @options.onFinish
+  @dir = 1</code></pre><dl class="doc"></dl></dd><dt id="Animation.next">next()</dt><dd><p><p>Advanced the animation to the next state. Returns the next animation frame, 
+which isn&#39;t necessarily different from the last, depending on speed.</p>
+</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Canvas</code><span>	An image-like canvas of the next frame</span></dd></dl><pre class="prettyprint"><code class="language-coffee">next: ->
+  if @t is @speed and not @finished
+    @frame = @sprites[@i+=@dir]
+    @t = 0
+  if @i is @sprites.length-1 
+    if not @loop
+      @finished = true
+      if @onFinish then @onFinish()
+    else
+      if @bounce
+        @dir = -1
+      else
+        @i = 0
+  if @i is 0 and @dir is -1 then @dir = 1
+  @t++
+  return @frame</code></pre><dl class="doc"></dl></dd></dl></dd></dl></div></body></html>

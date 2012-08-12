@@ -1,0 +1,83 @@
+extends layout
+
+append styles
+  link(rel='stylesheet',href='style/prettify.css')
+
+append scripts
+  script(src='scripts/prettify.js')
+  script
+    $(function(){prettyPrint()})
+
+mixin document(data)
+  dl.doc
+    each item in data
+      if item.ctx
+        if item.ctx.receiver
+          - var link = item.ctx.receiver+"."+item.ctx.name
+        else
+          - var link = item.ctx.name 
+        dt(id=link)= item.ctx.string
+      dd
+        p!= item.description.full
+        mixin tags(item.tags)
+        pre.prettyprint
+          code.language-coffee!= item.code
+        if item.children
+          mixin document(item.children)
+
+mixin nav(data,files,current)
+  ul.nav.nav-list
+    each file in files
+      li.nav-file
+        a(href=file+".html")= file
+      if file == current
+        each item in data
+          if item.ctx
+            li.nav-header
+              a(href="#"+item.ctx.name)= item.ctx.name
+          each child in item.children
+            if child.ctx
+              li
+                a(href="#"+child.ctx.receiver+"."+child.ctx.name)= child.ctx.name
+
+mixin tags(data)
+  dl.dl-horizontal
+    - var params = []
+    for tag in data
+      if tag.type == 'param'
+        - params.push(tag)
+    if params.length
+      dt Parameters:
+      dd
+        for param in params
+          p 
+            b= param.name+" "
+            code= param.types[0]
+            span= "\t"+param.description
+          if param.options
+            ul
+            for option in param.options
+              li
+                b= option.name+" "
+                code= option.types[0]
+                span= "\t"+option.description
+    for tag in data
+      case tag.type
+        when "return"
+          dt Returns:
+          dd
+            code= tag.types[0]
+            span= "\t" + tag.description
+
+
+
+
+
+block content
+  div.sidebar
+    mixin nav(dox,files,file)
+  div.container
+    h1= file
+    mixin document(dox)
+
+

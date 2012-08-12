@@ -22,10 +22,10 @@ gfx.edit = (data,x,y,r,g,b,a) ->
   darray = data.data
   index = (y*data.width+x)*4
   if r or g or b or a 
-    darray[index] = r or 0
-    darray[index++] = g or 0
-    darray[index++] = b or 0
-    darray[index++] = a or 0
+    darray[index] = r or darray[index]
+    darray[index++] = g or darray[index]
+    darray[index++] = b or darray[index]
+    darray[index++] = a or darray[index]
     return data.data = darray
   else
     return [darray[index],darray[index++],darray[index++],darray[index++]]

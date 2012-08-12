@@ -3,10 +3,10 @@
 class Game
   # Game constructor
   # @param {Object} options game setup options
-  # @option options {String} canvas an ID of a canvas element provided, one will be created if not
-  # @option options {Int} width width of canvas, defaults to 400
-  # @option options {Int} height height of canvas, defaults to 300
-  # @option options {Bool} showfps whether fps should be displayed
+  # @option {String} canvas an ID of a canvas element provided, one will be created if not
+  # @option {Int} width width of canvas, defaults to 400
+  # @option {Int} height height of canvas, defaults to 300
+  # @option {Bool} showfps whether fps should be displayed
   constructor: (@options={}) ->
     @canvas = document.getElementById(options.canvas) if @options.canvas?
     if not @canvas?
@@ -22,9 +22,9 @@ class Game
 
   # Starts the game with a state
   # @param {Object} state game state
-  # @option state {Function} setup function to run when state is initialised
-  # @option state {Function} update function to run every tick in which game logic is performed. is passed dt, the change in time since the last tick.
-  # @option state {Function} draw function to run every tick in which the game graphics are drawn
+  # @option {Function} setup function to run when state is initialised
+  # @option {Function} update function to run every tick in which game logic is performed. is passed dt, the change in time since the last tick.
+  # @option {Function} draw function to run every tick in which the game graphics are drawn
   start: (state) ->
     loading = @options.loadingScreen ? ->
     @switchState(state)
@@ -108,12 +108,12 @@ class ViewPort
 
   # ViewPort constructor
   # @param {Object} options options for setting up the viewport
-  # @option options {Game} parent the parent game instance to attach the viewport to
-  # @option options {Canvas} canvas the canvas this viewport should render on, defaults to the parents canvas
-  # @option options {Int} width the width of the viewport, defaults to the canvas width
-  # @option options {Int} height the height of the viewport, defaults to the canvas height
-  # @option options {Int} viewWidth the width of the viewable area, defaults to width
-  # @option options {Int} viewHeight the height of the viewable area, defaults to height
+  # @option {Game} parent the parent game instance to attach the viewport to
+  # @option {Canvas} canvas the canvas this viewport should render on, defaults to the parents canvas
+  # @option {Int} width the width of the viewport, defaults to the canvas width
+  # @option {Int} height the height of the viewport, defaults to the canvas height
+  # @option {Int} viewWidth the width of the viewable area, defaults to width
+  # @option {Int} viewHeight the height of the viewable area, defaults to height
   constructor: (@options) ->
     @parent = @options.parent
     @canvas = @options.canvas or @parent.canvas or util.canvas()
@@ -140,9 +140,20 @@ class ViewPort
       @e.push(entity)
       @parent.e.push(entity)
       if entity.name? then @[entity.name] = entity
+  # Remove an entity or an array of entities from the viewport, will no longer be updated and rendered with the viewport.
+  # @param {Entity} entity entity to remove, alternitively an array of entities can be given.
+  remove: (entity) ->
+    if entity.forEach
+      entity.forEach (obj) => @remove obj
+    else
+      if entity.name? then delete @[entity.name]
+      util.remove @e,entity
+      util.remove @parent.e,entity
+      delete entity.parent
+
 
   # Updates all entities within the viewport. The viewport update function should be called from your states update function
-  # @param {Float} dt dt, the time elapsed between ticks. all update functions should be passed dt if physics is needed.
+  # @param {Float} dt dt, the time elapsed between ticks. all update functions should be passed dt.
   update: (dt) ->
     for entity in @e
       if @close(entity) and entity.update?
@@ -215,6 +226,7 @@ class ViewPort
     if @viewY+@height > @viewHeight then @viewY = @viewHeight - @height
 
   # @see Game.find
+  #
   find: (components,ex) ->
     find.call(@,components,ex)
 
