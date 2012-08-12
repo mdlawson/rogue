@@ -114,7 +114,10 @@ friendly for entities part of a TileMap</p>
     @components.add "sprite"</code></pre><dl class="doc"></dl></dd><dt id="c.collide">class c.collide</dt><dd><p><p>Collision component. Adds this entity to the collidables of the parent, so other entities will
 account for it in there collision detection.
 Provides methods for finding collisions with this entity, and &quot;hit&quot; events will be emitted on contact with other collidables
-Overrides the entities move function with one that will only move as far as it can without colliding.</p>
+Overrides the entities move function with one that will only move as far as it can without colliding.
+In addition to having this component, collidable entities need to have a component that provides a <code>collide(ent)</code> function
+that will test for collisions with the entity ent.
+AABB and hitmap components are built in.</p>
 </p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class c.collide
   onadd: ->
     unless @components["layer"]? then @components.add "sprite"

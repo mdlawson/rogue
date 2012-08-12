@@ -34,6 +34,8 @@ collision =
       hitmap[point[2]].push [point[0],point[1]]
     return hitmap
 
+# AABB collision component. Provides a collide function to test collisions with this object
+# as an AABB.
 class c.AABB
   type: "AABB"
   collide: (obj) ->
@@ -44,15 +46,21 @@ class c.AABB
       col.e1 = @
       col.e2 = obj
       return col
-    else if obj.type is "hitmap" then return collision.AABBhitmap @rect(), obj
+    else if obj.type is "hitmap" then 
+      col = {}
+      col.e1 = @
+      col.e2 = obj
+      col.dir = collision.AABBhitmap @rect(), obj
     return false
-
+# Hitmap collision component. Provides a collision function to test collisions with this object
+# using a hitmap of the edges of the objects image. Provides a reasonably quick way of doing pixel based
+# collisions, provided the entities image doesnt change too much. 
 class c.hitmap
   type: "hitmap"
   onadd: ->
-    @_recalculateImage()
+    @recalculateImage()
 
-  _recalculateImage: ->
+  recalculateImage: ->
     @width = @image.width
     @height = @image.height
     @xOffset = math.round(@width/2)

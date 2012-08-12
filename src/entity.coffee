@@ -186,6 +186,9 @@ class c.tile
 # account for it in there collision detection.
 # Provides methods for finding collisions with this entity, and "hit" events will be emitted on contact with other collidables
 # Overrides the entities move function with one that will only move as far as it can without colliding.
+# In addition to having this component, collidable entities need to have a component that provides a `collide(ent)` function
+# that will test for collisions with the entity ent.
+# AABB and hitmap components are built in. 
 class c.collide
   onadd: ->
     unless @components["layer"]? then @components.add "sprite"
