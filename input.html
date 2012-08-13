@@ -53,7 +53,7 @@ Mouse position can be accessed at any time from mouse.x and mouse.y
 Functions are called in the context of mouse, and are passed the event.
 Example:
 </p>
-<pre><code>mouse = new Rogue.Mouse(game.canvas)
+<pre><code class="prettyprint lang-coffee">mouse = new Rogue.Mouse(game.canvas)
 mouse.left.click = (e) -&gt; console.log @x,@y # =&gt; logs the mouses position on click</code></pre>
 <p>Supports binding to left, middle, and right buttons on click, down, and up events</p>
 </p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>context </b><code>DOMElement</code><span>	the dom element to bind to</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">class Mouse

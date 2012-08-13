@@ -4,7 +4,7 @@ Components can be added to the entity with <code>entity.components.add</code>
 or though the property <code>require</code> on initialization.
 Example:
 </p>
-<pre><code>myEntity = new Entity({require:&quot;move&quot;})
+<pre><code class="prettyprint lang-coffee">myEntity = new Entity({require:&quot;move&quot;})
 myEntity.add(&quot;sprite&quot;) # sprite was already imported by move, it is not added a second time
 myEntity.add([&quot;collide&quot;,&quot;physics&quot;]) # adding arrays is also supported</code></pre>
 <p>New components can be made available to entities by attaching them to <code>Rogue.components.[name]</code>
