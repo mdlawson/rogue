@@ -11,7 +11,7 @@ myEntity.add([&quot;collide&quot;,&quot;physics&quot;]) # adding arrays is also 
 Entities have an event emitter on <code>ev</code></p>
 </p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class Entity
   </code></pre><dl class="doc"><dt id="Entity.constructor">constructor()</dt><dd><p><p>Entity constructor</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	the attributes the new entity should have</span></p><ul></ul><li><b>require </b><code>Array</code><span>	components that should be imported on creation</span></li><li><b>parent </b><code>Object</code><span>	the parent of this entity, is set automatically when added to a ViewPort</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (options) ->
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	the attributes the new entity should have</span></p><ul></ul><li><b>require </b><code>Array</code><span>	components that should be imported on creation</span></li><li><b>parent </b><code>Object</code><span>	the parent of this entity, is set automatically when added to a ViewPort</span></li><li><b>name </b><code>String</code><span>	entity name</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (options) ->
   @updates=[]    
   util.mixin @, options
   #if @require then @components.add(@require)
@@ -91,8 +91,7 @@ If the entity is a child of a viewport, then this will be called automatically.<
   c.globalAlpha = @opacity
   c.drawImage(@image, 0, 0, @width, @height)
   c.restore()</code></pre><dl class="doc"></dl></dd><dt id="c.sprite.scale">scale()</dt><dd><p><p>Scale the entity by a scale factor. Optionally use &quot;pixel perfect&quot; nearest neighbor scaling</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>scaleFactor </b><code>Int</code><span>	the factor to scale the dimensions by</span></p><p> <b>pixel </b><code>Bool</code><span>	use nearest neighbor scaling</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">scale: (@scaleFactor, @pixel) ->
-  @y-=@height*@scaleFactor[1]/2
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>scaleFactor </b><code>Array</code><span>	the factors to scale the dimensions by</span></p><p> <b>pixel </b><code>Bool</code><span>	use nearest neighbor scaling</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">scale: (@scaleFactor, @pixel) ->
   @image = gfx.scale @image,@scaleFactor,@pixel
   @_recalculateImage()</code></pre><dl class="doc"></dl></dd><dt id="c.sprite.rect">rect()</dt><dd><p><p>Used to calculate a AABB around the entity.</p>
 </p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Rect</code><span>	A rect has x,y,width and height properties</span></dd></dl><pre class="prettyprint"><code class="language-coffee">rect: ->
