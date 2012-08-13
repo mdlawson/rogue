@@ -46,7 +46,7 @@ class c.AABB
       col.e1 = @
       col.e2 = obj
       return col
-    else if obj.type is "hitmap" then 
+    else if obj.type is "hitmap"
       col = {}
       col.e1 = @
       col.e2 = obj

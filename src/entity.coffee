@@ -14,6 +14,7 @@ class Entity
   # @param {Object} options the attributes the new entity should have
   # @option {Array/String} require components that should be imported on creation
   # @option {Object} parent the parent of this entity, is set automatically when added to a ViewPort
+  # @option {String} name entity name
   constructor: (options) ->
     @updates=[]    
     util.mixin @, options
@@ -127,10 +128,9 @@ class c.sprite
     c.drawImage(@image, 0, 0, @width, @height)
     c.restore()
   # Scale the entity by a scale factor. Optionally use "pixel perfect" nearest neighbor scaling
-  # @param {Int} scaleFactor the factor to scale the dimensions by
+  # @param {Array} scaleFactor the factors to scale the dimensions by
   # @param {Bool} pixel use nearest neighbor scaling
   scale: (@scaleFactor, @pixel) ->
-    @y-=@height*@scaleFactor[1]/2
     @image = gfx.scale @image,@scaleFactor,@pixel
     @_recalculateImage()
 
