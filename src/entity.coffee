@@ -2,7 +2,7 @@
 # Components can be added to the entity with `entity.components.add`
 # or though the property `require` on initialization.
 # Example:
-# ```
+# ```coffee
 # myEntity = new Entity({require:"move"})
 # myEntity.add("sprite") # sprite was already imported by move, it is not added a second time
 # myEntity.add(["collide","physics"]) # adding arrays is also supported

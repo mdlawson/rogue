@@ -90,7 +90,7 @@ class Keyboard
 # Mouse position can be accessed at any time from mouse.x and mouse.y
 # Functions are called in the context of mouse, and are passed the event.
 # Example:
-# ```
+# ```coffee
 # mouse = new Rogue.Mouse(game.canvas)
 # mouse.left.click = (e) -> console.log @x,@y # => logs the mouses position on click
 # ```

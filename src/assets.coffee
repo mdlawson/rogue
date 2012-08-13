@@ -1,7 +1,7 @@
 # Asset manager. Helps download and organize all your asset files.
 # Is initially created with a manifest that must describe all your game assets.
 # Example:
-# ```
+# ```coffee
 # assets = new Rogue.AssetManager({
 #   baseUrl: ""
 #   packs:

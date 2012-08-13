@@ -18,7 +18,8 @@ mixin document(data)
           - var link = item.ctx.name 
         dt(id=link)= item.ctx.string
       dd
-        p!= item.description.full
+        - desc = item.description.full.replace(/<code class="/,'<code class="prettyprint ')
+        p!= desc
         mixin tags(item.tags)
         pre.prettyprint
           code.language-coffee!= item.code
