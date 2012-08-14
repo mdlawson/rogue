@@ -80,7 +80,7 @@ class GameLoop
     @lastTick = @currentTick
   # Pauses the game loop, loop still runs, but no functions are called
   pause: -> 
-    @paused = true
+    @paused = !@paused
   # Stops the game loop
   stop: ->
     @stopped = true
@@ -127,7 +127,12 @@ class ViewPort
     @x = @options.x or 0
     @y = @options.y or 0
     @e = []
-    @updates = []
+    @hashmap = new collision.SpatialHash 64
+    updateHash = ->
+      solid = @find ["collide"]
+      @hashmap.clear()
+      @hashmap.add ent for ent in solid
+    @updates = [updateHash]
 
   # Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, 
   # and position is drawn relative to the viewports position
@@ -155,10 +160,11 @@ class ViewPort
   # Updates all entities within the viewport. The viewport update function should be called from your states update function
   # @param {Float} dt dt, the time elapsed between ticks. all update functions should be passed dt.
   update: (dt) ->
+    func.call(@,dt) for func in @updates when func?
     for entity in @e
       if @close(entity) and entity.update?
         entity.update(dt)
-    func.call(@,dt) for func in @updates when func?
+    
 
   # Draws all entities within the viewport. The viewport draw function should be called from within your states draw function.
   draw: ->

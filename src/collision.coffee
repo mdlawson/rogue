@@ -34,6 +34,41 @@ collision =
       hitmap[point[2]].push [point[0],point[1]]
     return hitmap
 
+class collision.SpatialHash
+  constructor: (@cellsize) -> 
+    @h = {}
+  add: (entity) ->
+    rect = entity.rect()
+    rx = Math.floor(rect.x); ry = Math.floor(rect.y)
+    rxw = Math.floor(rx+rect.width); ryh = Math.floor(ry+rect.height)
+    x = rx-rx%@cellsize
+    ex = rxw-(rxw%@cellsize)
+    ey = ryh-(ryh%@cellsize)
+    while x <= ex
+      y = ry-ry%@cellsize
+      while y <= ey
+        hash = "x"+x+"y"+y
+        @h[hash] ?= []
+        @h[hash].push entity
+        y+=@cellsize
+      x+=@cellsize
+  find: (entity) ->
+    matches = []
+    for hash,cell of @h when entity in cell 
+      matches.push e for e in cell when e isnt entity
+    return matches
+    #matches = (e for e in matches when e isnt entity)
+  reset: ->
+    @clear()
+    @obj = []
+  clear: ->
+    @h = {}
+    
+
+
+
+
+
 # AABB collision component. Provides a collide function to test collisions with this object
 # as an AABB.
 class c.AABB
@@ -61,11 +96,11 @@ class c.hitmap
     @recalculateImage()
 
   recalculateImage: ->
-    @width = @image.width
-    @height = @image.height
+    @width   = @image.width
+    @height  = @image.height
     @xOffset = math.round(@width/2)
     @yOffset = math.round(@height/2)
-    @hitmap = collision.createHitmap @image
+    @hitmap  = collision.createHitmap @image
   collide: (obj) ->
     if obj.forEach
       obj.forEach (o) => @collide o

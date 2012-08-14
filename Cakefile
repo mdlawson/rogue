@@ -1,6 +1,6 @@
-flour = require 'flour'
+flour  = require 'flour'
 {exec} = require 'child_process'
-path = require 'path'
+path   = require 'path'
 
 # vars
 files = ['gfx', 'assets', 'entity','physics','tiles', 'input', 'collision', 'rogue']
@@ -17,11 +17,11 @@ task 'build:test', ->
   test = exec "coffee -o test/specs -c test/src"
 
 task 'build:doc', ->
-  fs = require 'fs'
-  dox = require '../dox'
-  jade = require 'jade'
+  fs     = require 'fs'
+  dox    = require '../dox'
+  jade   = require 'jade'
   stylus = require 'stylus'
-  nib = require 'nib'
+  nib    = require 'nib'
   fs.readFile doc, 'utf-8', (err,tmpl) ->
     fn = jade.compile tmpl, {filename:doc}
     for file in files

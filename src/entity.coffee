@@ -20,7 +20,7 @@ class Entity
     util.mixin @, options
     #if @require then @components.add(@require)
     
-    @ev         = new Eventer @
+    @ev = new Eventer @
     @components = new Importer Rogue.components,@
     if @require then @components.add @require
 
@@ -115,7 +115,7 @@ class c.sprite
     @y ?= 0
     @angle ?= 0
     @opacity ?= 255
-    if @scaleFactor? then @scale @scaleFactor, @pixel else @_recalculateImage()
+    if @scaleFactor? then @scale @scaleFactor, @pixel else @recalculateImage()
   # Draw the entity. This function should be ran at the end of each tick
   # If the entity is a child of a viewport, then this will be called automatically.
   draw: ->
@@ -132,7 +132,7 @@ class c.sprite
   # @param {Bool} pixel use nearest neighbor scaling
   scale: (@scaleFactor, @pixel) ->
     @image = gfx.scale @image,@scaleFactor,@pixel
-    @_recalculateImage()
+    @recalculateImage()
 
   # Used to calculate a AABB around the entity.
   # @return {Rect} A rect has x,y,width and height properties
@@ -142,7 +142,7 @@ class c.sprite
     width: @width
     height: @height
 
-  _recalculateImage: ->
+  recalculateImage: ->
     @width = @image.width
     @height = @image.height
     @xOffset = math.round(@width/2)
@@ -197,9 +197,11 @@ class c.collide
   # finds all entities that are colliding with us.
   # @return {Array} an array of collisions. Collisions are in the form {e1,e2,dir,pv} where dir is the rough direction of collision and pv is the penetration vector.
   findCollisions: ->
-    solid = @parent.find ["collide"],@
+    if @parent.hashmap
+      nearby = @parent.hashmap.find @
+    else nearby = @parent.find ["collide"]
     @colliding = []
-    for obj in solid
+    for obj in nearby
       col = @collide obj
       if col
         @ev.emit "hit",col
