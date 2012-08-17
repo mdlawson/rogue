@@ -83,7 +83,7 @@ class AssetManager
   # It's probably preferable to set up callbacks and then downloadAll() rather than `preload: true` and hope for the best
   # unless your assets are really small. Callbacks can be set up so that the game can start running as soon as a minimum of assets
   # has been downloaded.
-  downloadAll: (eee) ->
+  downloadAll: ->
     @download key for key,val of @packs
   
   # Set up callbacks. You can have callbacks on the events "load","complete" and "error" for each of your packs,
