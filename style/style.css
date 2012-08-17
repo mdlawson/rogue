@@ -1,6 +1,36 @@
+.container header {
+  padding: 40px 0px 10px;
+}
 .sidebar {
   position: fixed;
   left: 0px;
+  top: 40px;
+}
+.nav-file {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 18px;
+  color: #999;
+  text-transform: uppercase;
+}
+.nav-file a {
+  text-decoration: underline;
+}
+.nav-file ul {
+  margin-left: 15px;
+}
+.nav-file ul li.nav-header {
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 0px;
+}
+.nav-file ul li.nav-header a {
+  text-decoration: none;
+  padding: 3px 0px 3px;
+}
+.nav-file ul li.nav-header ul li {
+  text-transform: none;
 }
 dd dl {
   margin-left: 20px;

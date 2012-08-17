@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><title>rogue</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a></li><li class="nav-file"><a href="assets.html">assets</a></li><li class="nav-file"><a href="entity.html">entity</a></li><li class="nav-file"><a href="physics.html">physics</a></li><li class="nav-file"><a href="tiles.html">tiles</a></li><li class="nav-file"><a href="input.html">input</a></li><li class="nav-file"><a href="collision.html">collision</a></li><li class="nav-file"><a href="rogue.html">rogue</a></li><li class="nav-header"><a href="#Game">Game</a></li><li><a href="#Game.constructor">constructor</a></li><li><a href="#Game.start">start</a></li><li><a href="#Game.switchState">switchState</a></li><li><a href="#Game.clear">clear</a></li><li><a href="#Game.find">find</a></li><li class="nav-header"><a href="#GameLoop">GameLoop</a></li><li class="nav-header"><a href="#ViewPort">ViewPort</a></li><li><a href="#ViewPort.constructor">constructor</a></li><li><a href="#ViewPort.add">add</a></li><li><a href="#ViewPort.remove">remove</a></li><li><a href="#ViewPort.update">update</a></li><li><a href="#ViewPort.move">move</a></li><li><a href="#ViewPort.moveTo">moveTo</a></li><li><a href="#ViewPort.follow">follow</a></li><li><a href="#ViewPort.forceInside">forceInside</a></li><li><a href="#ViewPort.rect">rect</a></li><li><a href="#ViewPort.visible">visible</a></li><li><a href="#ViewPort.find">find</a></li><li class="nav-header"><a href="#log">log</a></li><li class="nav-header"><a href="#ready">ready</a></li></ul></div><div class="container"><h1>rogue</h1><dl class="doc"><dt id="Game">class Game</dt><dd><p><p>Base class on which the game is built. Provides basic state management functionality.
+</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul><li class="nav-header"><a href="#Game">Game</a><ul><li><a href="#Game.constructor">constructor</a></li><li><a href="#Game.start">start</a></li><li><a href="#Game.switchState">switchState</a></li><li><a href="#Game.clear">clear</a></li><li><a href="#Game.find">find</a></li></ul></li><li class="nav-header"><a href="#GameLoop">GameLoop</a><ul></ul></li><li class="nav-header"><a href="#ViewPort">ViewPort</a><ul><li><a href="#ViewPort.constructor">constructor</a></li><li><a href="#ViewPort.add">add</a></li><li><a href="#ViewPort.remove">remove</a></li><li><a href="#ViewPort.update">update</a></li><li><a href="#ViewPort.move">move</a></li><li><a href="#ViewPort.moveTo">moveTo</a></li><li><a href="#ViewPort.follow">follow</a></li><li><a href="#ViewPort.forceInside">forceInside</a></li><li><a href="#ViewPort.rect">rect</a></li><li><a href="#ViewPort.visible">visible</a></li><li><a href="#ViewPort.find">find</a></li></ul></li><li class="nav-header"><a href="#log">log</a><ul></ul></li><li class="nav-header"><a href="#Rogue.ready">ready</a><ul></ul></li></ul></li></ul></div><div class="container"><header><h1>rogue</h1></header><dl class="doc"><dt id="Game">class Game</dt><dd><p><p>Base class on which the game is built. Provides basic state management functionality.
 Instances of game have canvas, context, and loop, which is an instance of GameLoop, properties</p>
 </p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class Game
   </code></pre><dl class="doc"><dt id="Game.constructor">constructor()</dt><dd><p><p>Game constructor</p>
@@ -56,7 +56,7 @@ Runs functions in @call at 60fps</p>
     @lastTick = @currentTick
   # Pauses the game loop, loop still runs, but no functions are called
   pause: -> 
-    @paused = true
+    @paused = !@paused
   # Stops the game loop
   stop: ->
     @stopped = true</code></pre><dl class="doc"></dl></dd><dt id="ViewPort">class ViewPort</dt><dd><p><p>Viewport class, most games will use this. 
@@ -75,7 +75,12 @@ Expands the game world to be larger than the canvas.</p>
   @x = @options.x or 0
   @y = @options.y or 0
   @e = []
-  @updates = []</code></pre><dl class="doc"></dl></dd><dt id="ViewPort.add">add()</dt><dd><p><p>Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, 
+  @hashmap = new collision.SpatialHash 64
+  updateHash = ->
+    solid = @find ["collide"]
+    @hashmap.clear()
+    @hashmap.add ent for ent in solid
+  @updates = [updateHash]</code></pre><dl class="doc"></dl></dd><dt id="ViewPort.add">add()</dt><dd><p><p>Add an entity or an array of entities to the viewport, will be updated and rendered with the viewport, 
 and position is drawn relative to the viewports position</p>
 </p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>entity </b><code>Entity</code><span>	entity to add, alternitively an array of entities can be given.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">add: (entity) ->
   if entity.forEach
@@ -94,10 +99,11 @@ and position is drawn relative to the viewports position</p>
     util.remove @parent.e,entity
     delete entity.parent</code></pre><dl class="doc"></dl></dd><dt id="ViewPort.update">update()</dt><dd><p><p>Updates all entities within the viewport. The viewport update function should be called from your states update function</p>
 </p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>dt </b><code>Float</code><span>	dt, the time elapsed between ticks. all update functions should be passed dt.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">update: (dt) ->
+  func.call(@,dt) for func in @updates when func?
   for entity in @e
     if @close(entity) and entity.update?
       entity.update(dt)
-  func.call(@,dt) for func in @updates when func?</code></pre><dl class="doc"></dl></dd><dt id="ViewPort.move">move()</dt><dd><p><p>moves the view area by [x,y]</p>
+  </code></pre><dl class="doc"></dl></dd><dt id="ViewPort.move">move()</dt><dd><p><p>moves the view area by [x,y]</p>
 </p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>x </b><code>Int</code><span>	</span></p><p> <b>y </b><code>Int</code><span>	</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">move: (x,y) ->
   @viewX += x
   @viewY += y

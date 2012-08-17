@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><title>entity</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a></li><li class="nav-file"><a href="assets.html">assets</a></li><li class="nav-file"><a href="entity.html">entity</a></li><li class="nav-header"><a href="#Entity">Entity</a></li><li><a href="#Entity.constructor">constructor</a></li><li class="nav-header"><a href="#Importer">Importer</a></li><li class="nav-header"><a href="#Factory">Factory</a></li><li><a href="#Factory.constructor">constructor</a></li><li><a href="#Factory.deploy">deploy</a></li><li class="nav-header"><a href="#c.sprite">c.sprite</a></li><li><a href="#c.sprite.draw">draw</a></li><li><a href="#c.sprite.scale">scale</a></li><li><a href="#c.sprite.rect">rect</a></li><li class="nav-header"><a href="#c.move">c.move</a></li><li><a href="#c.move.move">move</a></li><li><a href="#c.move.moveTo">moveTo</a></li><li class="nav-header"><a href="#c.tile">c.tile</a></li><li class="nav-header"><a href="#c.collide">c.collide</a></li><li><a href="#c.collide.findCollisions">findCollisions</a></li><li class="nav-header"><a href="#c.layer">c.layer</a></li><li class="nav-header"><a href="#c.tween">c.tween</a></li><li><a href="#c.tween.tween">tween</a></li><li class="nav-file"><a href="physics.html">physics</a></li><li class="nav-file"><a href="tiles.html">tiles</a></li><li class="nav-file"><a href="input.html">input</a></li><li class="nav-file"><a href="collision.html">collision</a></li><li class="nav-file"><a href="rogue.html">rogue</a></li></ul></div><div class="container"><h1>entity</h1><dl class="doc"><dt id="Entity">class Entity</dt><dd><p><p>The main entity class. All entities are based on this.
+</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul><li class="nav-header"><a href="#Entity">Entity</a><ul><li><a href="#Entity.constructor">constructor</a></li></ul></li><li class="nav-header"><a href="#Importer">Importer</a><ul></ul></li><li class="nav-header"><a href="#Factory">Factory</a><ul><li><a href="#Factory.constructor">constructor</a></li><li><a href="#Factory.deploy">deploy</a></li></ul></li><li class="nav-header"><a href="#c.sprite">c.sprite</a><ul><li><a href="#c.sprite.draw">draw</a></li><li><a href="#c.sprite.scale">scale</a></li><li><a href="#c.sprite.rect">rect</a></li></ul></li><li class="nav-header"><a href="#c.move">c.move</a><ul><li><a href="#c.move.move">move</a></li><li><a href="#c.move.moveTo">moveTo</a></li></ul></li><li class="nav-header"><a href="#c.tile">c.tile</a><ul></ul></li><li class="nav-header"><a href="#c.collide">c.collide</a><ul><li><a href="#c.collide.findCollisions">findCollisions</a></li></ul></li><li class="nav-header"><a href="#c.layer">c.layer</a><ul></ul></li><li class="nav-header"><a href="#c.tween">c.tween</a><ul><li><a href="#c.tween.tween">tween</a></li></ul></li></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>entity</h1></header><dl class="doc"><dt id="Entity">class Entity</dt><dd><p><p>The main entity class. All entities are based on this.
 Components can be added to the entity with <code>entity.components.add</code>
 or though the property <code>require</code> on initialization.
 Example:
@@ -16,7 +16,7 @@ Entities have an event emitter on <code>ev</code></p>
   util.mixin @, options
   #if @require then @components.add(@require)
   
-  @ev         = new Eventer @
+  @ev = new Eventer @
   @components = new Importer Rogue.components,@
   if @require then @components.add @require</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="Importer">class Importer</dt><dd><p><p>Importer class. This is not exposed publicly, but is the basis of the component system and the physics behavior system.
 The importer allows a class to maintain a list of extensions, in Entities these are called Components, but physics behaviors follow the same system.
@@ -79,7 +79,7 @@ If a entity is initialized with a scaleFactor property, then it will be scaled o
     @y ?= 0
     @angle ?= 0
     @opacity ?= 255
-    if @scaleFactor? then @scale @scaleFactor, @pixel else @_recalculateImage()
+    if @scaleFactor? then @scale @scaleFactor, @pixel else @recalculateImage()
   </code></pre><dl class="doc"><dt id="c.sprite.draw">draw()</dt><dd><p><p>Draw the entity. This function should be ran at the end of each tick
 If the entity is a child of a viewport, then this will be called automatically.</p>
 </p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">draw: ->
@@ -93,7 +93,7 @@ If the entity is a child of a viewport, then this will be called automatically.<
   c.restore()</code></pre><dl class="doc"></dl></dd><dt id="c.sprite.scale">scale()</dt><dd><p><p>Scale the entity by a scale factor. Optionally use &quot;pixel perfect&quot; nearest neighbor scaling</p>
 </p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>scaleFactor </b><code>Array</code><span>	the factors to scale the dimensions by</span></p><p> <b>pixel </b><code>Bool</code><span>	use nearest neighbor scaling</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">scale: (@scaleFactor, @pixel) ->
   @image = gfx.scale @image,@scaleFactor,@pixel
-  @_recalculateImage()</code></pre><dl class="doc"></dl></dd><dt id="c.sprite.rect">rect()</dt><dd><p><p>Used to calculate a AABB around the entity.</p>
+  @recalculateImage()</code></pre><dl class="doc"></dl></dd><dt id="c.sprite.rect">rect()</dt><dd><p><p>Used to calculate a AABB around the entity.</p>
 </p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Rect</code><span>	A rect has x,y,width and height properties</span></dd></dl><pre class="prettyprint"><code class="language-coffee">rect: ->
   x: @x-@xOffset
   y: @y-@yOffset
@@ -122,9 +122,11 @@ AABB and hitmap components are built in.</p>
     unless @components["layer"]? then @components.add "sprite"
     @solid = if @components["physics"]? then false else true</code></pre><dl class="doc"><dt id="c.collide.findCollisions">findCollisions()</dt><dd><p><p>finds all entities that are colliding with us.</p>
 </p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Array</code><span>	an array of collisions. Collisions are in the form {e1,e2,dir,pv} where dir is the rough direction of collision and pv is the penetration vector.</span></dd></dl><pre class="prettyprint"><code class="language-coffee">findCollisions: ->
-  solid = @parent.find ["collide"],@
+  if @parent.hashmap
+    nearby = @parent.hashmap.find @
+  else nearby = @parent.find ["collide"]
   @colliding = []
-  for obj in solid
+  for obj in nearby
     col = @collide obj
     if col
       @ev.emit "hit",col

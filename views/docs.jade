@@ -22,6 +22,7 @@ mixin document(data)
         p!= desc
         mixin tags(item.tags)
         pre.prettyprint
+          - item.code = item.code.replace(/\n$/,'')
           code.language-coffee!= item.code
         if item.children
           mixin document(item.children)
@@ -31,15 +32,21 @@ mixin nav(data,files,current)
     each file in files
       li.nav-file
         a(href=file+".html")= file
-      if file == current
-        each item in data
-          if item.ctx
-            li.nav-header
-              a(href="#"+item.ctx.name)= item.ctx.name
-          each child in item.children
-            if child.ctx
-              li
-                a(href="#"+child.ctx.receiver+"."+child.ctx.name)= child.ctx.name
+        ul
+          if file == current
+            each item in data
+              if item.ctx
+                li.nav-header
+                  if item.ctx.receiver
+                    - var link = "#"+item.ctx.receiver+"."+item.ctx.name
+                  else
+                    - var link = "#"+item.ctx.name 
+                  a(href=link)= item.ctx.name
+                  ul
+                    each child in item.children
+                      if child.ctx
+                        li
+                          a(href="#"+child.ctx.receiver+"."+child.ctx.name)= child.ctx.name
 
 mixin tags(data)
   dl.dl-horizontal
@@ -78,7 +85,8 @@ block content
   div.sidebar
     mixin nav(dox,files,file)
   div.container
-    h1= file
+    header
+      h1= file
     mixin document(dox)
 
 
