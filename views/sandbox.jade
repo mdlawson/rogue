@@ -1,0 +1,38 @@
+extends layout
+
+append styles
+  link(href='http://fonts.googleapis.com/css?family=Inconsolata',rel='stylesheet')
+
+append scripts
+
+  script#tplSandbox(type='text/template')
+    <pre class="output"></pre>
+    <div class="input">
+    <textarea rows="1" placeholder="<%= placeholder %>"></textarea>
+    </div>
+
+  script#tplCommand(type='text/template')
+    % if (! _hidden) { %><span class="command"><%= command %></span>
+    <span class="prefix"><%= this.resultPrefix %></span><span class="<%= _class %>"><%= result %></span>
+    <% } %>
+
+  script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js')
+  script(src='libs/underscore.min.js')
+  script(src='libs/backbone.min.js')
+  script(src='libs/backbone-localStorage.min.js')
+  script(src='libs/coffee-script.js')
+
+  script(src='libs/console.js')
+
+  script
+    $(function(){
+      window.sandbox = new demoCon.View({
+        el : $('#sandbox'),
+      });
+    });
+
+block content
+  #sandbox sandbox console loading...
+
+
+

@@ -1,7 +1,6 @@
-<!DOCTYPE html><html><head><title>input</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul><li class="nav-header"><a href="#Keyboard">Keyboard</a><ul><li><a href="#Keyboard.press">press</a></li><li><a href="#Keyboard.release">release</a></li><li><a href="#Keyboard.pressed">pressed</a></li><li><a href="#undefined.keys">keys</a></li></ul></li><li class="nav-header"><a href="#Mouse">Mouse</a><ul></ul></li></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>input</h1></header><dl class="doc"><dt id="Keyboard">class Keyboard</dt><dd><p><p>Keyboard input class. Receives all keyboard input on a given context, and provides event driven and polling driven access
+<!DOCTYPE html><html><head><title>input</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul><li class="nav-header"><a href="#Keyboard">Keyboard</a><ul><li><a href="#Keyboard.press">press</a></li><li><a href="#Keyboard.release">release</a></li><li><a href="#Keyboard.pressed">pressed</a></li><li><a href="#undefined.keys">keys</a></li></ul></li><li class="nav-header"><a href="#Mouse">Mouse</a><ul></ul></li></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>input</h1></header><dl class="doc"><dt id="Keyboard">class Keyboard</dt><dd><p><p>Keyboard input class. Receives all keyboard input on a given context, and provides event driven and polling driven access
 to keyboard input.</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>context </b><code>DOMElement</code><span>	Element to receive input on.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">class Keyboard
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>context </b><code>DOMElement</code><span>	Element to receive input on.</span></p></dd></dl><pre class="prettyprint language-coffee">class Keyboard
   constructor: (@context) ->
     handleEvent = (e) =>
       e = e or window.event
@@ -11,21 +10,21 @@ to keyboard input.</p>
       if e.keyCode in fn then fn[e.keyCode]()
       e.preventDefault()
     @context.onkeydown = @context.onkeyup = handleEvent
-  </code></pre><dl class="doc"><dt id="Keyboard.press">press()</dt><dd><p><p>Binds the press a key or array of keys to a function. For supported keys, see the <code>keys</code> object below</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>key </b><code>Array</code><span>	Key(s) to execute callback function on</span></p><p> <b>fn </b><code>Function</code><span>	function to execute on press.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">press: (key, fn) ->
+  </pre><dl class="doc"><dt id="Keyboard.press">press()</dt><dd><p><p>Binds the press a key or array of keys to a function. For supported keys, see the <code>keys</code> object below</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>key </b><code>Array</code><span>	Key(s) to execute callback function on</span></p><p> <b>fn </b><code>Function</code><span>	function to execute on press.</span></p></dd></dl><pre class="prettyprint language-coffee">press: (key, fn) ->
   if key.forEach
     @press(k,fn) for k in key
   else
-    if keys[key]? then downFn[keys[key]] = fn else Rogue.log 3, "invalid key: #{key}"</code></pre><dl class="doc"></dl></dd><dt id="Keyboard.release">release()</dt><dd><p><p>Binds the release a key or array of keys to a function. For supported keys, see the <code>keys</code> object below</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>key </b><code>Array</code><span>	Key(s) to execute callback function on</span></p><p> <b>fn </b><code>Function</code><span>	function to execute on release.</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">release: (key, fn) ->
+    if keys[key]? then downFn[keys[key]] = fn else Rogue.log 3, "invalid key: #{key}"</pre><dl class="doc"></dl></dd><dt id="Keyboard.release">release()</dt><dd><p><p>Binds the release a key or array of keys to a function. For supported keys, see the <code>keys</code> object below</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>key </b><code>Array</code><span>	Key(s) to execute callback function on</span></p><p> <b>fn </b><code>Function</code><span>	function to execute on release.</span></p></dd></dl><pre class="prettyprint language-coffee">release: (key, fn) ->
   if key.forEach
     @release(k,fn) for k in key
   else
-    if keys[key]? then upFn[keys[key]] = fn else Rogue.log 3, "invalid key: #{key}"</code></pre><dl class="doc"></dl></dd><dt id="Keyboard.pressed">pressed()</dt><dd><p><p>Find the status of a given key.</p>
-</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Bool</code><span>	true if key is pressed</span></dd></dl><pre class="prettyprint"><code class="language-coffee">pressed: (key) ->
-  if keys[key]? then return pressedKeys[keys[key]] else Rogue.log 3, "invalid key: #{key}"</code></pre><dl class="doc"></dl></dd><dt id="keys">keys</dt><dd><p><p>Supported keys and keycodes
+    if keys[key]? then upFn[keys[key]] = fn else Rogue.log 3, "invalid key: #{key}"</pre><dl class="doc"></dl></dd><dt id="Keyboard.pressed">pressed()</dt><dd><p><p>Find the status of a given key.</p>
+</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Bool</code><span>	true if key is pressed</span></dd></dl><pre class="prettyprint language-coffee">pressed: (key) ->
+  if keys[key]? then return pressedKeys[keys[key]] else Rogue.log 3, "invalid key: #{key}"</pre><dl class="doc"></dl></dd><dt id="keys">keys</dt><dd><p><p>Supported keys and keycodes
 In addition to this list, all letter, number, f, and numpad keys are supported.</p>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">keys = {
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">keys = {
   backspace: 8
   tab: 9
   enter: 13
@@ -47,7 +46,7 @@ In addition to this list, all letter, number, f, and numpad keys are supported.<
   insert: 45
   'delete': 46
   leftwin: 91
-  rightwin: 92</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="Mouse">class Mouse</dt><dd><p><p>Mouse input class. Tracks the position of the cursor and allows for binding functions to mouse actions.
+  rightwin: 92</pre><dl class="doc"></dl></dd></dl></dd><dt id="Mouse">class Mouse</dt><dd><p><p>Mouse input class. Tracks the position of the cursor and allows for binding functions to mouse actions.
 Could probably redo to use event emitter style.
 Mouse position can be accessed at any time from mouse.x and mouse.y
 Functions are called in the context of mouse, and are passed the event.
@@ -56,7 +55,7 @@ Example:
 <pre><code class="prettyprint lang-coffee">mouse = new Rogue.Mouse(game.canvas)
 mouse.left.click = (e) -&gt; console.log @x,@y # =&gt; logs the mouses position on click</code></pre>
 <p>Supports binding to left, middle, and right buttons on click, down, and up events</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>context </b><code>DOMElement</code><span>	the dom element to bind to</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">class Mouse
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>context </b><code>DOMElement</code><span>	the dom element to bind to</span></p></dd></dl><pre class="prettyprint language-coffee">class Mouse
   constructor: (@context) ->
     @context.oncontextmenu = -> false
     buttons = ["left","middle","right"]
@@ -76,4 +75,5 @@ mouse.left.click = (e) -&gt; console.log @x,@y # =&gt; logs the mouses position 
           @context.focus()
           @[buttons[e.button]][e.type.replace("mouse","")].call(@,e)
           e.preventDefault()
-    @context.onmousemove = mousemove</code></pre><dl class="doc"></dl></dd></dl></div></body></html>
+    @context.onmousemove = mousemove</pre><dl class="doc"></dl></dd></dl></div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="libs/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></body></html>

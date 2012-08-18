@@ -4,7 +4,7 @@ append styles
   link(rel='stylesheet',href='style/prettify.css')
 
 append scripts
-  script(src='scripts/prettify.js')
+  script(src='libs/prettify.js')
   script
     $(function(){prettyPrint()})
 
@@ -21,9 +21,7 @@ mixin document(data)
         - desc = item.description.full.replace(/<code class="/,'<code class="prettyprint ')
         p!= desc
         mixin tags(item.tags)
-        pre.prettyprint
-          - item.code = item.code.replace(/\n$/,'')
-          code.language-coffee!= item.code
+        pre.prettyprint.language-coffee!= item.code
         if item.children
           mixin document(item.children)
 

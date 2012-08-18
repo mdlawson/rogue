@@ -1,8 +1,7 @@
-<!DOCTYPE html><html><head><title>gfx</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul><li class="nav-header"><a href="#gfx.scale">scale</a><ul></ul></li><li class="nav-header"><a href="#gfx.edit">edit</a><ul></ul></li><li class="nav-header"><a href="#gfx.edgeDetect">edgeDetect</a><ul></ul></li></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>gfx</h1></header><dl class="doc"><dt id="gfx.scale">gfx.scale()</dt><dd><p><p>Scales an image by scale factor s, producing a new canvas with the scaled image.
+<!DOCTYPE html><html><head><title>gfx</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul><li class="nav-header"><a href="#gfx.scale">scale</a><ul></ul></li><li class="nav-header"><a href="#gfx.edit">edit</a><ul></ul></li><li class="nav-header"><a href="#gfx.edgeDetect">edgeDetect</a><ul></ul></li></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>gfx</h1></header><dl class="doc"><dt id="gfx.scale">gfx.scale()</dt><dd><p><p>Scales an image by scale factor s, producing a new canvas with the scaled image.
 Most useful when pixel is set to true, as this allows for scaling using nearest neighbor 
 scaling for pixel art graphics.</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>simg </b><code>Canvas</code><span>	source image to scale</span></p><p> <b>s </b><code>Array</code><span>	scale factor, [x,y]</span></p><p> <b>pixel </b><code>Bool</code><span>	use nearest neighbor scaling where available (aka not in IE)</span></p></dd><dt>Returns:</dt><dd><code>Canvas</code><span>	scaled image</span></dd></dl><pre class="prettyprint"><code class="language-coffee">gfx.scale = (simg,s,pixel) ->
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>simg </b><code>Canvas</code><span>	source image to scale</span></p><p> <b>s </b><code>Array</code><span>	scale factor, [x,y]</span></p><p> <b>pixel </b><code>Bool</code><span>	use nearest neighbor scaling where available (aka not in IE)</span></p></dd><dt>Returns:</dt><dd><code>Canvas</code><span>	scaled image</span></dd></dl><pre class="prettyprint language-coffee">gfx.scale = (simg,s,pixel) ->
   if pixel
     dimg = util.canvas()
     dimg.width = simg.width*s[0]
@@ -20,10 +19,10 @@ scaling for pixel art graphics.</p>
     ctx = simg.getContext("2d")
     ctx.scale(s[0],s[1])
     return simg
-  </code></pre><dl class="doc"></dl></dd><dt id="gfx.edit">gfx.edit()</dt><dd><p><p>Useful for editing/viewing canvas image data
+  </pre><dl class="doc"></dl></dd><dt id="gfx.edit">gfx.edit()</dt><dd><p><p>Useful for editing/viewing canvas image data
 If rgba is set, then the data is written to with the new values, and the new data is returned
 otherwise the existing values are returned</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>data </b><code>ImageData</code><span>	some canvas image data</span></p><p> <b>x </b><code>Int</code><span>	</span></p><p> <b>y </b><code>Int</code><span>	</span></p><p> <b>r </b><code>Int</code><span>	</span></p><p> <b>g </b><code>Int</code><span>	</span></p><p> <b>b </b><code>Int</code><span>	</span></p><p> <b>a </b><code>Int</code><span>	</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	either an array of [r,g,b,a] or modified image data</span></dd></dl><pre class="prettyprint"><code class="language-coffee">gfx.edit = (data,x,y,r,g,b,a) ->
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>data </b><code>ImageData</code><span>	some canvas image data</span></p><p> <b>x </b><code>Int</code><span>	</span></p><p> <b>y </b><code>Int</code><span>	</span></p><p> <b>r </b><code>Int</code><span>	</span></p><p> <b>g </b><code>Int</code><span>	</span></p><p> <b>b </b><code>Int</code><span>	</span></p><p> <b>a </b><code>Int</code><span>	</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	either an array of [r,g,b,a] or modified image data</span></dd></dl><pre class="prettyprint language-coffee">gfx.edit = (data,x,y,r,g,b,a) ->
   darray = data.data
   index = (y*data.width+x)*4
   if r or g or b or a 
@@ -33,10 +32,10 @@ otherwise the existing values are returned</p>
     darray[index++] = a or darray[index]
     return data.data = darray
   else
-    return [darray[index],darray[index++],darray[index++],darray[index++]]</code></pre><dl class="doc"></dl></dd><dt id="gfx.edgeDetect">gfx.edgeDetect()</dt><dd><p><p>Performs primitive edge detection to find the borders where the image becomes transparent.
+    return [darray[index],darray[index++],darray[index++],darray[index++]]</pre><dl class="doc"></dl></dd><dt id="gfx.edgeDetect">gfx.edgeDetect()</dt><dd><p><p>Performs primitive edge detection to find the borders where the image becomes transparent.
 each point is in the form [x,y,dir] where dir is the direction that an object colliding at this point
 is coming from. </p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>img </b><code>Canvas</code><span>	image to process</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	array of points marking the edges of the image.</span></dd></dl><pre class="prettyprint"><code class="language-coffee">gfx.edgeDetect = (img) ->
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>img </b><code>Canvas</code><span>	image to process</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	array of points marking the edges of the image.</span></dd></dl><pre class="prettyprint language-coffee">gfx.edgeDetect = (img) ->
   ctx = img.getContext("2d")
   data = ctx.getImageData(0,0,img.width,img.height)
   lookup = (x,y) -> gfx.edit(data,x,y)[3]
@@ -48,4 +47,5 @@ is coming from. </p>
         else if lookup(x-1,y) is 0 then points.push [x,y,"left"]
         else if lookup(x,y+1) is 0 then points.push [x,y,"down"]
         else if lookup(x,y-1) is 0 then points.push [x,y,"up"]
-  return points</code></pre><dl class="doc"></dl></dd></dl></div></body></html>
+  return points</pre><dl class="doc"></dl></dd></dl></div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="libs/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></body></html>

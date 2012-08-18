@@ -1,7 +1,6 @@
-<!DOCTYPE html><html><head><title>collision</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul><li class="nav-header"><a href="#c.AABB">c.AABB</a><ul></ul></li><li class="nav-header"><a href="#c.hitmap">c.hitmap</a><ul></ul></li></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>collision</h1></header><dl class="doc"><dt id="c.AABB">class c.AABB</dt><dd><p><p>AABB collision component. Provides a collide function to test collisions with this object
+<!DOCTYPE html><html><head><title>collision</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul><li class="nav-header"><a href="#c.AABB">c.AABB</a><ul></ul></li><li class="nav-header"><a href="#c.hitmap">c.hitmap</a><ul></ul></li></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>collision</h1></header><dl class="doc"><dt id="c.AABB">class c.AABB</dt><dd><p><p>AABB collision component. Provides a collide function to test collisions with this object
 as an AABB.</p>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class c.AABB
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">class c.AABB
   type: "AABB"
   collide: (obj) ->
     if obj.forEach
@@ -16,10 +15,11 @@ as an AABB.</p>
       col.e1 = @
       col.e2 = obj
       col.dir = collision.AABBhitmap @rect(), obj
-    return false</code></pre><dl class="doc"></dl></dd><dt id="c.hitmap">class c.hitmap</dt><dd><p><p>Hitmap collision component. Provides a collision function to test collisions with this object
+    return false</pre><dl class="doc"></dl></dd><dt id="c.hitmap">class c.hitmap</dt><dd><p><p>Hitmap collision component. Provides a collision function to test collisions with this object
 using a hitmap of the edges of the objects image. Provides a reasonably quick way of doing pixel based
 collisions, provided the entities image doesnt change too much.</p>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class c.hitmap
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">class c.hitmap
   type: "hitmap"
   onadd: ->
-    @recalculateImage()</code></pre><dl class="doc"></dl></dd></dl></div></body></html>
+    @recalculateImage()</pre><dl class="doc"></dl></dd></dl></div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="libs/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></body></html>

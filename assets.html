@@ -1,5 +1,4 @@
-<!DOCTYPE html><html><head><title>assets</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="scripts/prettify.js"></script><script>$(function(){prettyPrint()})
-</script></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul><li class="nav-header"><a href="#AssetManager">AssetManager</a><ul><li><a href="#AssetManager.constructor">constructor</a></li><li><a href="#AssetManager.download">download</a></li><li><a href="#AssetManager.downloadAll">downloadAll</a></li><li><a href="#AssetManager.on">on</a></li></ul></li><li class="nav-header"><a href="#SpriteSheet">SpriteSheet</a><ul><li><a href="#SpriteSheet.slice">slice</a></li></ul></li><li class="nav-header"><a href="#Animation">Animation</a><ul><li><a href="#Animation.constructor">constructor</a></li><li><a href="#Animation.next">next</a></li></ul></li></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>assets</h1></header><dl class="doc"><dt id="AssetManager">class AssetManager</dt><dd><p><p>Asset manager. Helps download and organize all your asset files.
+<!DOCTYPE html><html><head><title>assets</title><link rel="stylesheet" href="style/bootstrap.css"><link rel="stylesheet" href="style/style.css"><link rel="stylesheet" href="style/prettify.css"></head><body><div class="sidebar"><ul class="nav nav-list"><li class="nav-file"><a href="gfx.html">gfx</a><ul></ul></li><li class="nav-file"><a href="assets.html">assets</a><ul><li class="nav-header"><a href="#AssetManager">AssetManager</a><ul><li><a href="#AssetManager.constructor">constructor</a></li><li><a href="#AssetManager.download">download</a></li><li><a href="#AssetManager.downloadAll">downloadAll</a></li><li><a href="#AssetManager.on">on</a></li></ul></li><li class="nav-header"><a href="#SpriteSheet">SpriteSheet</a><ul><li><a href="#SpriteSheet.slice">slice</a></li></ul></li><li class="nav-header"><a href="#Animation">Animation</a><ul><li><a href="#Animation.constructor">constructor</a></li><li><a href="#Animation.next">next</a></li></ul></li></ul></li><li class="nav-file"><a href="entity.html">entity</a><ul></ul></li><li class="nav-file"><a href="physics.html">physics</a><ul></ul></li><li class="nav-file"><a href="tiles.html">tiles</a><ul></ul></li><li class="nav-file"><a href="input.html">input</a><ul></ul></li><li class="nav-file"><a href="collision.html">collision</a><ul></ul></li><li class="nav-file"><a href="rogue.html">rogue</a><ul></ul></li></ul></div><div class="container"><header><h1>assets</h1></header><dl class="doc"><dt id="AssetManager">class AssetManager</dt><dd><p><p>Asset manager. Helps download and organize all your asset files.
 Is initially created with a manifest that must describe all your game assets.
 Example:
 </p>
@@ -18,9 +17,9 @@ Example:
 # &quot;img/b1.png&quot; is now available as a canvas as assets.core.bg1
 # &quot;sound/jump.ogg&quot;/&quot;sound/jump.mp3&quot; is now available as an Audio() element as assets.core.jump
 # By having sounds as both ogg and mp3 we can cover all browsers.</code></pre>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class AssetManager
-  </code></pre><dl class="doc"><dt id="AssetManager.constructor">constructor()</dt><dd><p><p>AssetManager constructor</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>manifest </b><code>Object</code><span>	a manifest declares &quot;packs&quot; of assets. See above example</span></p><ul></ul><li><b>baseUrl </b><code>String</code><span>	this will be added to all source urls</span></li><li><b>packs </b><code>Object</code><span>	</span></li><li><b>preload </b><code>Bool</code><span>	note: If preload is set to true, and your assets load really fast, callbacks may not fire.</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (manifest) ->
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">class AssetManager
+  </pre><dl class="doc"><dt id="AssetManager.constructor">constructor()</dt><dd><p><p>AssetManager constructor</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>manifest </b><code>Object</code><span>	a manifest declares &quot;packs&quot; of assets. See above example</span></p><ul></ul><li><b>baseUrl </b><code>String</code><span>	this will be added to all source urls</span></li><li><b>packs </b><code>Object</code><span>	</span></li><li><b>preload </b><code>Bool</code><span>	note: If preload is set to true, and your assets load really fast, callbacks may not fire.</span></li></dd></dl><pre class="prettyprint language-coffee">constructor: (manifest) ->
   @callbacks = {load:{},complete:{},error:{}}
   @base = manifest.baseUrl or ""
   @packs = {}
@@ -28,8 +27,8 @@ Example:
   for name,contents of manifest.packs
     @packs[name] = contents
     @total += contents.length
-  manifest.preload and @downloadAll()</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.download">download()</dt><dd><p><p>Download a pack manually from the manifest. If it has already been downloaded, it will not be downloaded again</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>pack </b><code>String</code><span>	name of pack to download</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">download: (pack) ->
+  manifest.preload and @downloadAll()</pre><dl class="doc"></dl></dd><dt id="AssetManager.download">download()</dt><dd><p><p>Download a pack manually from the manifest. If it has already been downloaded, it will not be downloaded again</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>pack </b><code>String</code><span>	name of pack to download</span></p></dd></dl><pre class="prettyprint language-coffee">download: (pack) ->
   that = @
   contents = @packs[pack]
   unless contents?
@@ -65,24 +64,24 @@ Example:
           unless data.canPlayType codecs[ext] then asset.src = asset.alt
           asset.onerror = -> callback.call(that,asset,false)
           asset.addEventListener 'canplaythrough', -> that.loaded @
-          asset.load()</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.downloadAll">downloadAll()</dt><dd><p><p>Download all packs
+          asset.load()</pre><dl class="doc"></dl></dd><dt id="AssetManager.downloadAll">downloadAll()</dt><dd><p><p>Download all packs
 It&#39;s probably preferable to set up callbacks and then downloadAll() rather than <code>preload: true</code> and hope for the best
 unless your assets are really small. Callbacks can be set up so that the game can start running as soon as a minimum of assets
 has been downloaded.</p>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">downloadAll: ->
-  @download key for key,val of @packs</code></pre><dl class="doc"></dl></dd><dt id="AssetManager.on">on()</dt><dd><p><p>Set up callbacks. You can have callbacks on the events &quot;load&quot;,&quot;complete&quot; and &quot;error&quot; for each of your packs,
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">downloadAll: ->
+  @download key for key,val of @packs</pre><dl class="doc"></dl></dd><dt id="AssetManager.on">on()</dt><dd><p><p>Set up callbacks. You can have callbacks on the events &quot;load&quot;,&quot;complete&quot; and &quot;error&quot; for each of your packs,
 or set pack to &quot;all&quot; to run for all packs. Yes that does mean you can&#39;t have callbacks on a pack named all. That&#39;s a silly name for a pack anyway
 callbacks on the &quot;load&quot; event get passed the current percentage</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>e </b><code>String</code><span>	an event to call on. Must be one of &quot;load&quot;,&quot;complete&quot; or &quot;error&quot;</span></p><p> <b>pack </b><code>String</code><span>	the name of the pack you want the event to apply to</span></p><p> <b>fn </b><code>Function</code><span>	the callback function</span></p></dd></dl><pre class="prettyprint"><code class="language-coffee">on: (e,pack,fn) ->
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>e </b><code>String</code><span>	an event to call on. Must be one of &quot;load&quot;,&quot;complete&quot; or &quot;error&quot;</span></p><p> <b>pack </b><code>String</code><span>	the name of the pack you want the event to apply to</span></p><p> <b>fn </b><code>Function</code><span>	the callback function</span></p></dd></dl><pre class="prettyprint language-coffee">on: (e,pack,fn) ->
   if e in ["load","complete","error"]
     if pack is "all"
       @["on"+e] ?= []
       @["on"+e].push fn
     else 
       @callbacks[e][pack] ?= []
-      @callbacks[e][pack].push fn</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="SpriteSheet">class SpriteSheet</dt><dd><p><p>SpriteSheet class. The spritesheet class takes an image and a resolution, and chops it down into chunks of that resolution,
+      @callbacks[e][pack].push fn</pre><dl class="doc"></dl></dd></dl></dd><dt id="SpriteSheet">class SpriteSheet</dt><dd><p><p>SpriteSheet class. The spritesheet class takes an image and a resolution, and chops it down into chunks of that resolution,
 making an array-like object. </p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>image </b><code>Canvas</code><span>	image to slice</span></li><li><b>res </b><code>Array</code><span>	resolution of resultant images, in the form [x,y]</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">class SpriteSheet
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>image </b><code>Canvas</code><span>	image to slice</span></li><li><b>res </b><code>Array</code><span>	resolution of resultant images, in the form [x,y]</span></li></dd></dl><pre class="prettyprint language-coffee">class SpriteSheet
   constructor: (@options) ->
     @img = @options.image
     @res = @options.res or [32,32]
@@ -96,13 +95,13 @@ making an array-like object. </p>
         cx.drawImage(@img,x,y,c.width,c.height,0,0,c.width,c.height)
         this[@length] = c
         @length++
-  </code></pre><dl class="doc"><dt id="SpriteSheet.slice">slice()</dt><dd><p><p>Slices a portion of this spritesheet</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>start </b><code>Int</code><span>	position to start slice at</span></p><p> <b>end </b><code>Int</code><span>	position to end slice at</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	an array of images in the range</span></dd></dl><pre class="prettyprint"><code class="language-coffee">slice: (start, end) ->
-  return Array::slice.call(this, start, end);</code></pre><dl class="doc"></dl></dd></dl></dd><dt id="Animation">class Animation</dt><dd><p><p>Animation class. from a given spritesheet, produces an animation instance with a <code>next()</code> function that should
+  </pre><dl class="doc"><dt id="SpriteSheet.slice">slice()</dt><dd><p><p>Slices a portion of this spritesheet</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>start </b><code>Int</code><span>	position to start slice at</span></p><p> <b>end </b><code>Int</code><span>	position to end slice at</span></p></dd><dt>Returns:</dt><dd><code>Array</code><span>	an array of images in the range</span></dd></dl><pre class="prettyprint language-coffee">slice: (start, end) ->
+  return Array::slice.call(this, start, end);</pre><dl class="doc"></dl></dd></dl></dd><dt id="Animation">class Animation</dt><dd><p><p>Animation class. from a given spritesheet, produces an animation instance with a <code>next()</code> function that should
 be ran every tick to advance the animation state.</p>
-</p><dl class="dl-horizontal"></dl><pre class="prettyprint"><code class="language-coffee">class Animation
-  </code></pre><dl class="doc"><dt id="Animation.constructor">constructor()</dt><dd><p><p>Animation constructor</p>
-</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>spritesheet </b><code>Object</code><span>	an array or array-like object that contains animation frames</span></li><li><b>speed </b><code>Int</code><span>	the number of ticks between each frame of the animation. defaults to 6, or 10fps</span></li><li><b>start </b><code>Int</code><span>	the frame of the animation to start on. defaults to 0</span></li><li><b>loop </b><code>Bool</code><span>	should the animation loop?</span></li><li><b>bounce </b><code>Bool</code><span>	should the animation reverse instead of loop?</span></li><li><b>onFinish </b><code>Function</code><span>	callback on animation end</span></li></dd></dl><pre class="prettyprint"><code class="language-coffee">constructor: (@options) ->
+</p><dl class="dl-horizontal"></dl><pre class="prettyprint language-coffee">class Animation
+  </pre><dl class="doc"><dt id="Animation.constructor">constructor()</dt><dd><p><p>Animation constructor</p>
+</p><dl class="dl-horizontal"><dt>Parameters:</dt><dd><p> <b>options </b><code>Object</code><span>	</span></p><ul></ul><li><b>spritesheet </b><code>Object</code><span>	an array or array-like object that contains animation frames</span></li><li><b>speed </b><code>Int</code><span>	the number of ticks between each frame of the animation. defaults to 6, or 10fps</span></li><li><b>start </b><code>Int</code><span>	the frame of the animation to start on. defaults to 0</span></li><li><b>loop </b><code>Bool</code><span>	should the animation loop?</span></li><li><b>bounce </b><code>Bool</code><span>	should the animation reverse instead of loop?</span></li><li><b>onFinish </b><code>Function</code><span>	callback on animation end</span></li></dd></dl><pre class="prettyprint language-coffee">constructor: (@options) ->
   @sprites = @options.spritesheet
   @speed = @options.speed or 6
   @i = @options.start or 0
@@ -111,9 +110,9 @@ be ran every tick to advance the animation state.</p>
   @bounce = @options.bounce or false
   @finished = false
   @onFinish = @options.onFinish
-  @dir = 1</code></pre><dl class="doc"></dl></dd><dt id="Animation.next">next()</dt><dd><p><p>Advanced the animation to the next state. Returns the next animation frame, 
+  @dir = 1</pre><dl class="doc"></dl></dd><dt id="Animation.next">next()</dt><dd><p><p>Advanced the animation to the next state. Returns the next animation frame, 
 which isn&#39;t necessarily different from the last, depending on speed.</p>
-</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Canvas</code><span>	An image-like canvas of the next frame</span></dd></dl><pre class="prettyprint"><code class="language-coffee">next: ->
+</p><dl class="dl-horizontal"><dt>Returns:</dt><dd><code>Canvas</code><span>	An image-like canvas of the next frame</span></dd></dl><pre class="prettyprint language-coffee">next: ->
   if @t is @speed and not @finished
     @frame = @sprites[@i+=@dir]
     @t = 0
@@ -128,4 +127,5 @@ which isn&#39;t necessarily different from the last, depending on speed.</p>
         @i = 0
   if @i is 0 and @dir is -1 then @dir = 1
   @t++
-  return @frame</code></pre><dl class="doc"></dl></dd></dl></dd></dl></div></body></html>
+  return @frame</pre><dl class="doc"></dl></dd></dl></dd></dl></div><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script><script src="libs/prettify.js"></script><script>$(function(){prettyPrint()})
+</script></body></html>
