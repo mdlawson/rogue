@@ -13,6 +13,10 @@ Rogue - A canvas games library written in CoffeeScript
 * Light: 50kb compiled, 25kb minified, 8kb minified+gzip (at last count, still growing)
 * No dependencies
 
+## Documentation
+
+See documentation inline in source or at [http://mdlawson.github.com/rogue](http://mdlawson.github.com/rogue)
+
 * Basic classes:
   * Game
   * GameLoop
