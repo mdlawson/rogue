@@ -38,6 +38,10 @@ Rogue - A canvas games library written in CoffeeScript
 * Behaviors:
   * Collide
   * Gravity
+
+## Documentation
+
+See documentation inline in source or at [http://mdlawson.github.com/rogue](http://mdlawson.github.com/rogue)
   
 ## Credits
 
