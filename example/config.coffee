@@ -1,20 +1,16 @@
 exports.config =
+  # See http://brunch.readthedocs.org/en/latest/config.html for documentation.
   paths:
-    assets: 'app/static'
-  # See docs at http://brunch.readthedocs.org/en/latest/config.html.
+    public: './built'
+    #vendor: '../lib'
   files:
     javascripts:
-      defaultExtension: 'coffee'
       joinTo:
-        'javascripts/app.js': /^app/
-        'javascripts/vendor.js': /^vendor/
+        'js/app.js': /^app/
+        'js/vendor.js': /^vendor/
 
     stylesheets:
-      defaultExtension: 'styl'
-      joinTo: 'stylesheets/app.css'
-      order:
-        before: ['vendor/styles/normalize.css']
-        after: ['vendor/styles/helpers.css']
+      joinTo:
+        'style/app.css': /^(app|vendor)/
   server:
-    port: '8000'
-    run: yes
+    run: true

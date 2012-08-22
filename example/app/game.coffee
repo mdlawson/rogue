@@ -1,7 +1,9 @@
 state = require 'state'
 
 game = new Rogue.Game
-	fps: true
+  fps: true
+  width: 800
+  height: 600
 game.input = new Rogue.Keyboard game.canvas
 game.mouse = new Rogue.Mouse game
 game.assets = assets = new Rogue.AssetManager

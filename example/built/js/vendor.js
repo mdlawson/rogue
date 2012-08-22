@@ -8,7 +8,7 @@
   var cache = {};
 
   var has = function(object, name) {
-    return hasOwnProperty.call(object, name);
+    return ({}).hasOwnProperty.call(object, name);
   };
 
   var expand = function(root, name) {
@@ -37,7 +37,7 @@
     return function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return require(absolute);
+      return globals.require(absolute);
     };
   };
 
@@ -74,234 +74,9 @@
   globals.require.brunch = true;
 })();
 
-// lib/handlebars/base.js
-var Handlebars = {};
-
-Handlebars.VERSION = "1.0.beta.6";
-
-Handlebars.helpers  = {};
-Handlebars.partials = {};
-
-Handlebars.registerHelper = function(name, fn, inverse) {
-  if(inverse) { fn.not = inverse; }
-  this.helpers[name] = fn;
-};
-
-Handlebars.registerPartial = function(name, str) {
-  this.partials[name] = str;
-};
-
-Handlebars.registerHelper('helperMissing', function(arg) {
-  if(arguments.length === 2) {
-    return undefined;
-  } else {
-    throw new Error("Could not find property '" + arg + "'");
-  }
-});
-
-var toString = Object.prototype.toString, functionType = "[object Function]";
-
-Handlebars.registerHelper('blockHelperMissing', function(context, options) {
-  var inverse = options.inverse || function() {}, fn = options.fn;
-
-
-  var ret = "";
-  var type = toString.call(context);
-
-  if(type === functionType) { context = context.call(this); }
-
-  if(context === true) {
-    return fn(this);
-  } else if(context === false || context == null) {
-    return inverse(this);
-  } else if(type === "[object Array]") {
-    if(context.length > 0) {
-      for(var i=0, j=context.length; i<j; i++) {
-        ret = ret + fn(context[i]);
-      }
-    } else {
-      ret = inverse(this);
-    }
-    return ret;
-  } else {
-    return fn(context);
-  }
-});
-
-Handlebars.registerHelper('each', function(context, options) {
-  var fn = options.fn, inverse = options.inverse;
-  var ret = "";
-
-  if(context && context.length > 0) {
-    for(var i=0, j=context.length; i<j; i++) {
-      ret = ret + fn(context[i]);
-    }
-  } else {
-    ret = inverse(this);
-  }
-  return ret;
-});
-
-Handlebars.registerHelper('if', function(context, options) {
-  var type = toString.call(context);
-  if(type === functionType) { context = context.call(this); }
-
-  if(!context || Handlebars.Utils.isEmpty(context)) {
-    return options.inverse(this);
-  } else {
-    return options.fn(this);
-  }
-});
-
-Handlebars.registerHelper('unless', function(context, options) {
-  var fn = options.fn, inverse = options.inverse;
-  options.fn = inverse;
-  options.inverse = fn;
-
-  return Handlebars.helpers['if'].call(this, context, options);
-});
-
-Handlebars.registerHelper('with', function(context, options) {
-  return options.fn(context);
-});
-
-Handlebars.registerHelper('log', function(context) {
-  Handlebars.log(context);
-});
-;
-// lib/handlebars/utils.js
-Handlebars.Exception = function(message) {
-  var tmp = Error.prototype.constructor.apply(this, arguments);
-
-  for (var p in tmp) {
-    if (tmp.hasOwnProperty(p)) { this[p] = tmp[p]; }
-  }
-
-  this.message = tmp.message;
-};
-Handlebars.Exception.prototype = new Error;
-
-// Build out our basic SafeString type
-Handlebars.SafeString = function(string) {
-  this.string = string;
-};
-Handlebars.SafeString.prototype.toString = function() {
-  return this.string.toString();
-};
-
-(function() {
-  var escape = {
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#x27;",
-    "`": "&#x60;"
-  };
-
-  var badChars = /&(?!\w+;)|[<>"'`]/g;
-  var possible = /[&<>"'`]/;
-
-  var escapeChar = function(chr) {
-    return escape[chr] || "&amp;";
-  };
-
-  Handlebars.Utils = {
-    escapeExpression: function(string) {
-      // don't escape SafeStrings, since they're already safe
-      if (string instanceof Handlebars.SafeString) {
-        return string.toString();
-      } else if (string == null || string === false) {
-        return "";
-      }
-
-      if(!possible.test(string)) { return string; }
-      return string.replace(badChars, escapeChar);
-    },
-
-    isEmpty: function(value) {
-      if (typeof value === "undefined") {
-        return true;
-      } else if (value === null) {
-        return true;
-      } else if (value === false) {
-        return true;
-      } else if(Object.prototype.toString.call(value) === "[object Array]" && value.length === 0) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  };
-})();;
-// lib/handlebars/runtime.js
-Handlebars.VM = {
-  template: function(templateSpec) {
-    // Just add water
-    var container = {
-      escapeExpression: Handlebars.Utils.escapeExpression,
-      invokePartial: Handlebars.VM.invokePartial,
-      programs: [],
-      program: function(i, fn, data) {
-        var programWrapper = this.programs[i];
-        if(data) {
-          return Handlebars.VM.program(fn, data);
-        } else if(programWrapper) {
-          return programWrapper;
-        } else {
-          programWrapper = this.programs[i] = Handlebars.VM.program(fn);
-          return programWrapper;
-        }
-      },
-      programWithDepth: Handlebars.VM.programWithDepth,
-      noop: Handlebars.VM.noop
-    };
-
-    return function(context, options) {
-      options = options || {};
-      return templateSpec.call(container, Handlebars, context, options.helpers, options.partials, options.data);
-    };
-  },
-
-  programWithDepth: function(fn, data, $depth) {
-    var args = Array.prototype.slice.call(arguments, 2);
-
-    return function(context, options) {
-      options = options || {};
-
-      return fn.apply(this, [context, options.data || data].concat(args));
-    };
-  },
-  program: function(fn, data) {
-    return function(context, options) {
-      options = options || {};
-
-      return fn(context, options.data || data);
-    };
-  },
-  noop: function() { return ""; },
-  invokePartial: function(partial, name, context, helpers, partials, data) {
-    options = { helpers: helpers, partials: partials, data: data };
-
-    if(partial === undefined) {
-      throw new Handlebars.Exception("The partial " + name + " could not be found");
-    } else if(partial instanceof Function) {
-      return partial(context, options);
-    } else if (!Handlebars.compile) {
-      throw new Handlebars.Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
-    } else {
-      partials[name] = Handlebars.compile(partial);
-      return partials[name](context, options);
-    }
-  }
-};
-
-Handlebars.template = Handlebars.VM.template;
-;
-;
-
 // Generated by CoffeeScript 1.3.3
 (function() {
-  var Animation, AssetManager, Entity, Eventer, Game, GameLoop, Importer, Keyboard, Mouse, Rogue, RollingAverage, SpriteSheet, TileMap, Tween, ViewPort, b, c, collision, find, gfx, intergrate, log, math, physics, sqrt, util, v,
+  var Animation, AssetManager, Entity, Eventer, Factory, Game, GameLoop, Importer, Keyboard, Mouse, Rogue, RollingAverage, SpriteSheet, TileMap, Tween, ViewPort, b, c, collision, find, gfx, intergrate, log, math, physics, sqrt, util, v,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -312,24 +87,24 @@ Handlebars.template = Handlebars.VM.template;
 
   gfx.scale = function(simg, s, pixel) {
     var ctx, dimg;
-    dimg = util.canvas();
-    dimg.width = simg.width * s[0];
-    dimg.height = simg.height * s[1];
-    ctx = dimg.getContext("2d");
-    ctx.scale(s[0], s[1]);
     if (pixel) {
-      if (ctx.mozImageSmoothingEnabled != null) {
-        ctx.mozImageSmoothingEnabled = false;
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(simg, 0, 0, simg.width, simg.height);
-      } else {
-        ctx.fillStyle = ctx.createPattern(simg, 'repeat');
-        ctx.fillRect(0, 0, simg.width, simg.height);
-      }
-    } else {
+      dimg = util.canvas();
+      dimg.width = simg.width * s[0];
+      dimg.height = simg.height * s[1];
+      ctx = dimg.getContext("2d");
+      ctx.scale(s[0], s[1]);
+      ctx.imageSmoothingEnabled = ctx.mozImageSmoothingEnabled = ctx.webkitImageSmoothingEnabled = false;
       ctx.drawImage(simg, 0, 0, simg.width, simg.height);
+      ctx.fillStyle = ctx.createPattern(simg, 'repeat');
+      ctx.fillRect(0, 0, simg.width, simg.height);
+      return dimg;
+    } else {
+      simg.width *= s[0];
+      simg.height *= s[1];
+      ctx = simg.getContext("2d");
+      ctx.scale(s[0], s[1]);
+      return simg;
     }
-    return dimg;
   };
 
   gfx.edit = function(data, x, y, r, g, b, a) {
@@ -337,10 +112,10 @@ Handlebars.template = Handlebars.VM.template;
     darray = data.data;
     index = (y * data.width + x) * 4;
     if (r || g || b || a) {
-      darray[index] = r || 0;
-      darray[index++] = g || 0;
-      darray[index++] = b || 0;
-      darray[index++] = a || 0;
+      darray[index] = r || darray[index];
+      darray[index++] = g || darray[index];
+      darray[index++] = b || darray[index];
+      darray[index++] = a || darray[index];
       return data.data = darray;
     } else {
       return [darray[index], darray[index++], darray[index++], darray[index++]];
@@ -583,18 +358,20 @@ Handlebars.template = Handlebars.VM.template;
       this.t = 0;
       this.loop = this.options.loop || true;
       this.bounce = this.options.bounce || false;
+      this.finished = false;
       this.onFinish = this.options.onFinish;
       this.dir = 1;
       this.frame = this.sprites[this.i];
     }
 
     Animation.prototype.next = function() {
-      if (this.t === this.speed) {
+      if (this.t === this.speed && !this.finished) {
         this.frame = this.sprites[this.i += this.dir];
         this.t = 0;
       }
       if (this.i === this.sprites.length - 1) {
         if (!this.loop) {
+          this.finished = true;
           if (this.onFinish) {
             this.onFinish();
           }
@@ -624,7 +401,9 @@ Handlebars.template = Handlebars.VM.template;
       util.mixin(this, options);
       this.ev = new Eventer(this);
       this.components = new Importer(Rogue.components, this);
-      this.components.add(this.require);
+      if (this.require) {
+        this.components.add(this.require);
+      }
       delete this.require;
       if (this.parent) {
         this.parent.e.push(this);
@@ -717,6 +496,50 @@ Handlebars.template = Handlebars.VM.template;
 
   })();
 
+  Factory = (function() {
+
+    function Factory(options) {
+      var i, _i, _ref;
+      this.hanger = [];
+      this.entity = options.entity || Rogue.Entity;
+      this.opts = options.options || {};
+      this.initial = options.initial;
+      for (i = _i = 0, _ref = this.initial; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+        this.hanger.push(this.build());
+      }
+    }
+
+    Factory.prototype.deploy = function() {
+      var e;
+      if (this.hanger.length > 0) {
+        e = this.hanger.pop();
+      } else {
+        e = this.build();
+      }
+      if (e.parent) {
+        e.parent.add(e);
+      }
+      return e;
+    };
+
+    Factory.prototype.build = function() {
+      var ent;
+      ent = new this.entity(this.opts);
+      ent.factory = this;
+      ent["return"] = function() {
+        if (this.parent) {
+          this.parent.remove(this);
+        }
+        this.factory.hanger.push(this);
+        return util.mixin(this, this.factory.opts);
+      };
+      return ent;
+    };
+
+    return Factory;
+
+  })();
+
   c = {};
 
   c.sprite = (function() {
@@ -726,7 +549,7 @@ Handlebars.template = Handlebars.VM.template;
     sprite.prototype.onadd = function() {
       var _ref, _ref1, _ref2, _ref3;
       if (!this.image) {
-        log(2, "Sprite entitys require an image");
+        log(2, "Sprite entities require an image");
       }
       if ((_ref = this.x) == null) {
         this.x = 0;
@@ -743,7 +566,7 @@ Handlebars.template = Handlebars.VM.template;
       if (this.scaleFactor != null) {
         return this.scale(this.scaleFactor, this.pixel);
       } else {
-        return this._recalculateImage();
+        return this.recalculateImage();
       }
     };
 
@@ -762,9 +585,8 @@ Handlebars.template = Handlebars.VM.template;
     sprite.prototype.scale = function(scaleFactor, pixel) {
       this.scaleFactor = scaleFactor;
       this.pixel = pixel;
-      this.y -= this.height * this.scaleFactor[1] / 2;
       this.image = gfx.scale(this.image, this.scaleFactor, this.pixel);
-      return this._recalculateImage();
+      return this.recalculateImage();
     };
 
     sprite.prototype.rect = function() {
@@ -776,7 +598,7 @@ Handlebars.template = Handlebars.VM.template;
       };
     };
 
-    sprite.prototype._recalculateImage = function() {
+    sprite.prototype.recalculateImage = function() {
       this.width = this.image.width;
       this.height = this.image.height;
       this.xOffset = math.round(this.width / 2);
@@ -831,15 +653,6 @@ Handlebars.template = Handlebars.VM.template;
       return this.tile.parent.place(this);
     };
 
-    tile.prototype.rect = function() {
-      return {
-        x: (this.res[0] * this.x) - this.xOffset,
-        y: (this.res[1] * this.y) - this.yOffset,
-        width: this.width,
-        height: this.height
-      };
-    };
-
     return tile;
 
   })();
@@ -856,14 +669,19 @@ Handlebars.template = Handlebars.VM.template;
     };
 
     collide.prototype.findCollisions = function() {
-      var col, obj, solid, _i, _len;
-      solid = this.parent.find(["collide"], this);
+      var col, nearby, obj, _i, _len;
+      if (this.parent.hashmap) {
+        nearby = this.parent.hashmap.find(this);
+      } else {
+        nearby = this.parent.find(["collide"]);
+      }
       this.colliding = [];
-      for (_i = 0, _len = solid.length; _i < _len; _i++) {
-        obj = solid[_i];
+      for (_i = 0, _len = nearby.length; _i < _len; _i++) {
+        obj = nearby[_i];
         col = this.collide(obj);
         if (col) {
           this.ev.emit("hit", col);
+          obj.ev.emit("hit", col);
           this.colliding.push(col);
         }
       }
@@ -1069,8 +887,6 @@ Handlebars.template = Handlebars.VM.template;
 
   physics = {};
 
-  v = {};
-
   b = {};
 
   physics.behavior = b;
@@ -1091,87 +907,76 @@ Handlebars.template = Handlebars.VM.template;
 
   sqrt = Math.sqrt;
 
-  v.add = function(a, b, c) {
-    c[0] = a[0] + b[0];
-    c[1] = a[1] + b[1];
-    return c;
-  };
-
-  v.sub = function(a, b, c) {
-    c[0] = a[0] - b[0];
-    c[1] = a[1] - b[1];
-    return c;
-  };
-
-  v.dir = function(a, b, c) {
-    var dx, dy, l;
-    dx = b[0] - a[0];
-    dy = b[1] - a[1];
-    l = 1 / (sqrt(dx * dx + dy * dy));
-    c[0] = dx * l;
-    c[1] = dy * l;
-    return c;
-  };
-
-  v.scale = function(a, b, c) {
-    c[0] = a[0] * b;
-    c[1] = a[1] * b;
-    return c;
-  };
-
-  v.proj = function(a, b, c) {
-    var dpb;
-    dpb = (a[0] * b[0] + a[1] * b[1]) / (b[0] * b[0] + b[1] * b[1]);
-    c[0] = dpb * b[0];
-    c[1] = dpb * b[1];
-    return c;
-  };
-
-  v.dot = function(a, b) {
-    return a[0] * b[0] + a[1] * b[1];
-  };
-
-  v.cross = function(a, b) {
-    return (a[0] * b[0]) - (a[1] * b[1]);
-  };
-
-  v.dist = function(a, b) {
-    var dx, dy;
-    dx = b[0] - a[0];
-    dy = b[1] - a[1];
-    return sqrt(dx * dx + dy * dy);
-  };
-
-  v.distSq = function(a, b) {
-    var dx, dy;
-    dx = b[0] - a[0];
-    dy = b[1] - a[1];
-    return dx * dx + dy * dy;
-  };
-
-  v.norm = function(a, c) {
-    var m;
-    m = sqrt(a[0] * a[0] + a[1] * a[1]);
-    c[0] = a[0] / m;
-    c[1] = a[1] / m;
-    return c;
-  };
-
-  v.clone = function(a, c) {
-    return c = a.slice(0);
-  };
-
-  v.neg = function(a, c) {
-    c[0] = -a[0];
-    return c[1] = -a[1](c);
-  };
-
-  v.mag = function(a) {
-    return sqrt(a[0] * a[0] + a[1] * a[1]);
-  };
-
-  v.magSq = function(a) {
-    return a[0] * a[0] + a[1] * a[1];
+  v = {
+    add: function(a, b, c) {
+      c[0] = a[0] + b[0];
+      c[1] = a[1] + b[1];
+      return c;
+    },
+    sub: function(a, b, c) {
+      c[0] = a[0] - b[0];
+      c[1] = a[1] - b[1];
+      return c;
+    },
+    dir: function(a, b, c) {
+      var dx, dy, l;
+      dx = b[0] - a[0];
+      dy = b[1] - a[1];
+      l = 1 / (sqrt(dx * dx + dy * dy));
+      c[0] = dx * l;
+      c[1] = dy * l;
+      return c;
+    },
+    scale: function(a, b, c) {
+      c[0] = a[0] * b;
+      c[1] = a[1] * b;
+      return c;
+    },
+    proj: function(a, b, c) {
+      var dpb;
+      dpb = (a[0] * b[0] + a[1] * b[1]) / (b[0] * b[0] + b[1] * b[1]);
+      c[0] = dpb * b[0];
+      c[1] = dpb * b[1];
+      return c;
+    },
+    dot: function(a, b) {
+      return a[0] * b[0] + a[1] * b[1];
+    },
+    cross: function(a, b) {
+      return (a[0] * b[0]) - (a[1] * b[1]);
+    },
+    dist: function(a, b) {
+      var dx, dy;
+      dx = b[0] - a[0];
+      dy = b[1] - a[1];
+      return sqrt(dx * dx + dy * dy);
+    },
+    distSq: function(a, b) {
+      var dx, dy;
+      dx = b[0] - a[0];
+      dy = b[1] - a[1];
+      return dx * dx + dy * dy;
+    },
+    norm: function(a, c) {
+      var m;
+      m = sqrt(a[0] * a[0] + a[1] * a[1]);
+      c[0] = a[0] / m;
+      c[1] = a[1] / m;
+      return c;
+    },
+    clone: function(a, c) {
+      return c = a.slice(0);
+    },
+    neg: function(a, c) {
+      c[0] = -a[0];
+      return c[1] = -a[1](c);
+    },
+    mag: function(a) {
+      return sqrt(a[0] * a[0] + a[1] * a[1]);
+    },
+    magSq: function(a) {
+      return a[0] * a[0] + a[1] * a[1];
+    }
   };
 
   c.physics = (function() {
@@ -1204,7 +1009,10 @@ Handlebars.template = Handlebars.VM.template;
       if ((_ref2 = this.friction) == null) {
         this.friction = 0;
       }
-      return (_ref3 = this.mass) != null ? _ref3 : this.mass = 1;
+      if ((_ref3 = this.mass) == null) {
+        this.mass = 1;
+      }
+      return this.solid = false;
     };
 
     physics.prototype.intergrate = function(dt) {
@@ -1284,9 +1092,9 @@ Handlebars.template = Handlebars.VM.template;
       if (options.name) {
         this.name = options.name;
       }
+      this.components = {};
       this.width = this.size[0] * this.res[0];
       this.height = this.size[1] * this.res[1];
-      this.components = [];
       this.tiles = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -1552,7 +1360,8 @@ Handlebars.template = Handlebars.VM.template;
         listener = a === "click" ? "onclick" : "onmouse" + a;
         this.context[listener] = function(e) {
           e = e || window.event;
-          _this[buttons[e.button]][e.type.replace("mouse", "")](e);
+          _this.context.focus();
+          _this[buttons[e.button]][e.type.replace("mouse", "")].call(_this, e);
           return e.preventDefault();
         };
       }
@@ -1641,6 +1450,70 @@ Handlebars.template = Handlebars.VM.template;
     }
   };
 
+  collision.SpatialHash = (function() {
+
+    function SpatialHash(cellsize) {
+      this.cellsize = cellsize;
+      this.h = {};
+    }
+
+    SpatialHash.prototype.add = function(entity) {
+      var ex, ey, hash, rect, rx, rxw, ry, ryh, x, y, _base, _ref, _results;
+      rect = entity.rect();
+      rx = Math.floor(rect.x);
+      ry = Math.floor(rect.y);
+      rxw = Math.floor(rx + rect.width);
+      ryh = Math.floor(ry + rect.height);
+      x = rx - rx % this.cellsize;
+      ex = rxw - (rxw % this.cellsize);
+      ey = ryh - (ryh % this.cellsize);
+      _results = [];
+      while (x <= ex) {
+        y = ry - ry % this.cellsize;
+        while (y <= ey) {
+          hash = "x" + x + "y" + y;
+          if ((_ref = (_base = this.h)[hash]) == null) {
+            _base[hash] = [];
+          }
+          this.h[hash].push(entity);
+          y += this.cellsize;
+        }
+        _results.push(x += this.cellsize);
+      }
+      return _results;
+    };
+
+    SpatialHash.prototype.find = function(entity) {
+      var cell, e, hash, matches, _i, _len, _ref;
+      matches = [];
+      _ref = this.h;
+      for (hash in _ref) {
+        cell = _ref[hash];
+        if (__indexOf.call(cell, entity) >= 0) {
+          for (_i = 0, _len = cell.length; _i < _len; _i++) {
+            e = cell[_i];
+            if (e !== entity) {
+              matches.push(e);
+            }
+          }
+        }
+      }
+      return matches;
+    };
+
+    SpatialHash.prototype.reset = function() {
+      this.clear();
+      return this.obj = [];
+    };
+
+    SpatialHash.prototype.clear = function() {
+      return this.h = {};
+    };
+
+    return SpatialHash;
+
+  })();
+
   c.AABB = (function() {
 
     function AABB() {}
@@ -1661,7 +1534,10 @@ Handlebars.template = Handlebars.VM.template;
         col.e2 = obj;
         return col;
       } else if (obj.type === "hitmap") {
-        return collision.AABBhitmap(this.rect(), obj);
+        col = {};
+        col.e1 = this;
+        col.e2 = obj;
+        col.dir = collision.AABBhitmap(this.rect(), obj);
       }
       return false;
     };
@@ -1677,10 +1553,10 @@ Handlebars.template = Handlebars.VM.template;
     hitmap.prototype.type = "hitmap";
 
     hitmap.prototype.onadd = function() {
-      return this._recalculateImage();
+      return this.recalculateImage();
     };
 
-    hitmap.prototype._recalculateImage = function() {
+    hitmap.prototype.recalculateImage = function() {
       this.width = this.image.width;
       this.height = this.image.height;
       this.xOffset = math.round(this.width / 2);
@@ -1755,7 +1631,8 @@ Handlebars.template = Handlebars.VM.template;
         this.canvas = util.canvas();
         document.body.appendChild(this.canvas);
       }
-      this.canvas.tabIndex = 1;
+      this.canvas.tabIndex = 0;
+      this.canvas.style.outline = "none";
       this.width = this.canvas.width = (_ref = this.options.width) != null ? _ref : 400;
       this.height = this.canvas.height = (_ref1 = this.options.height) != null ? _ref1 : 300;
       this.showFPS = (_ref2 = this.options.fps) != null ? _ref2 : false;
@@ -1836,7 +1713,7 @@ Handlebars.template = Handlebars.VM.template;
     };
 
     GameLoop.prototype.pause = function() {
-      return this.paused = true;
+      return this.paused = !this.paused;
     };
 
     GameLoop.prototype.stop = function() {
@@ -1877,6 +1754,7 @@ Handlebars.template = Handlebars.VM.template;
   ViewPort = (function() {
 
     function ViewPort(options) {
+      var updateHash;
       this.options = options;
       this.parent = this.options.parent;
       this.canvas = this.options.canvas || this.parent.canvas || util.canvas();
@@ -1890,7 +1768,19 @@ Handlebars.template = Handlebars.VM.template;
       this.x = this.options.x || 0;
       this.y = this.options.y || 0;
       this.e = [];
-      this.updates = [];
+      this.hashmap = new collision.SpatialHash(64);
+      updateHash = function() {
+        var ent, solid, _i, _len, _results;
+        solid = this.find(["collide"]);
+        this.hashmap.clear();
+        _results = [];
+        for (_i = 0, _len = solid.length; _i < _len; _i++) {
+          ent = solid[_i];
+          _results.push(this.hashmap.add(ent));
+        }
+        return _results;
+      };
+      this.updates = [updateHash];
     }
 
     ViewPort.prototype.add = function(entity) {
@@ -1909,21 +1799,39 @@ Handlebars.template = Handlebars.VM.template;
       }
     };
 
+    ViewPort.prototype.remove = function(entity) {
+      var _this = this;
+      if (entity.forEach) {
+        return entity.forEach(function(obj) {
+          return _this.remove(obj);
+        });
+      } else {
+        if (entity.name != null) {
+          delete this[entity.name];
+        }
+        util.remove(this.e, entity);
+        util.remove(this.parent.e, entity);
+        return delete entity.parent;
+      }
+    };
+
     ViewPort.prototype.update = function(dt) {
       var entity, func, _i, _j, _len, _len1, _ref, _ref1, _results;
-      _ref = this.e;
+      _ref = this.updates;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        entity = _ref[_i];
-        if (this.close(entity) && (entity.update != null)) {
-          entity.update(dt);
+        func = _ref[_i];
+        if (func != null) {
+          func.call(this, dt);
         }
       }
-      _ref1 = this.updates;
+      _ref1 = this.e;
       _results = [];
       for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        func = _ref1[_j];
-        if (func != null) {
-          _results.push(func.call(this, dt));
+        entity = _ref1[_j];
+        if (this.close(entity) && (entity.update != null)) {
+          _results.push(entity.update(dt));
+        } else {
+          _results.push(void 0);
         }
       }
       return _results;
@@ -2159,11 +2067,7 @@ Handlebars.template = Handlebars.VM.template;
 
   math.vector = v;
 
-  Rogue = this.Rogue = {};
-
-  if (typeof module !== "undefined" && module !== null) {
-    module.exports = Rogue;
-  }
+  Rogue = {};
 
   Rogue.ticker = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(tick) {
     return window.setTimeout(tick, 1000 / 60);
@@ -2206,12 +2110,247 @@ Handlebars.template = Handlebars.VM.template;
 
   Rogue.Entity = Entity;
 
+  Rogue.Factory = Factory;
+
   Rogue.Keyboard = Keyboard;
 
   Rogue.Mouse = Mouse;
 
   Rogue.loglevel = 4;
 
+  if (typeof exports === 'object') {
+    module.exports = Rogue;
+  } else if (typeof define === 'function' && define.amd) {
+    define(Rogue);
+  } else {
+    this.Rogue = Rogue;
+  }
+
 }).call(this);
+;
+
+// lib/handlebars/base.js
+var Handlebars = {};
+
+Handlebars.VERSION = "1.0.beta.6";
+
+Handlebars.helpers  = {};
+Handlebars.partials = {};
+
+Handlebars.registerHelper = function(name, fn, inverse) {
+  if(inverse) { fn.not = inverse; }
+  this.helpers[name] = fn;
+};
+
+Handlebars.registerPartial = function(name, str) {
+  this.partials[name] = str;
+};
+
+Handlebars.registerHelper('helperMissing', function(arg) {
+  if(arguments.length === 2) {
+    return undefined;
+  } else {
+    throw new Error("Could not find property '" + arg + "'");
+  }
+});
+
+var toString = Object.prototype.toString, functionType = "[object Function]";
+
+Handlebars.registerHelper('blockHelperMissing', function(context, options) {
+  var inverse = options.inverse || function() {}, fn = options.fn;
+
+
+  var ret = "";
+  var type = toString.call(context);
+
+  if(type === functionType) { context = context.call(this); }
+
+  if(context === true) {
+    return fn(this);
+  } else if(context === false || context == null) {
+    return inverse(this);
+  } else if(type === "[object Array]") {
+    if(context.length > 0) {
+      for(var i=0, j=context.length; i<j; i++) {
+        ret = ret + fn(context[i]);
+      }
+    } else {
+      ret = inverse(this);
+    }
+    return ret;
+  } else {
+    return fn(context);
+  }
+});
+
+Handlebars.registerHelper('each', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+  var ret = "";
+
+  if(context && context.length > 0) {
+    for(var i=0, j=context.length; i<j; i++) {
+      ret = ret + fn(context[i]);
+    }
+  } else {
+    ret = inverse(this);
+  }
+  return ret;
+});
+
+Handlebars.registerHelper('if', function(context, options) {
+  var type = toString.call(context);
+  if(type === functionType) { context = context.call(this); }
+
+  if(!context || Handlebars.Utils.isEmpty(context)) {
+    return options.inverse(this);
+  } else {
+    return options.fn(this);
+  }
+});
+
+Handlebars.registerHelper('unless', function(context, options) {
+  var fn = options.fn, inverse = options.inverse;
+  options.fn = inverse;
+  options.inverse = fn;
+
+  return Handlebars.helpers['if'].call(this, context, options);
+});
+
+Handlebars.registerHelper('with', function(context, options) {
+  return options.fn(context);
+});
+
+Handlebars.registerHelper('log', function(context) {
+  Handlebars.log(context);
+});
+;
+// lib/handlebars/utils.js
+Handlebars.Exception = function(message) {
+  var tmp = Error.prototype.constructor.apply(this, arguments);
+
+  for (var p in tmp) {
+    if (tmp.hasOwnProperty(p)) { this[p] = tmp[p]; }
+  }
+
+  this.message = tmp.message;
+};
+Handlebars.Exception.prototype = new Error;
+
+// Build out our basic SafeString type
+Handlebars.SafeString = function(string) {
+  this.string = string;
+};
+Handlebars.SafeString.prototype.toString = function() {
+  return this.string.toString();
+};
+
+(function() {
+  var escape = {
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#x27;",
+    "`": "&#x60;"
+  };
+
+  var badChars = /&(?!\w+;)|[<>"'`]/g;
+  var possible = /[&<>"'`]/;
+
+  var escapeChar = function(chr) {
+    return escape[chr] || "&amp;";
+  };
+
+  Handlebars.Utils = {
+    escapeExpression: function(string) {
+      // don't escape SafeStrings, since they're already safe
+      if (string instanceof Handlebars.SafeString) {
+        return string.toString();
+      } else if (string == null || string === false) {
+        return "";
+      }
+
+      if(!possible.test(string)) { return string; }
+      return string.replace(badChars, escapeChar);
+    },
+
+    isEmpty: function(value) {
+      if (typeof value === "undefined") {
+        return true;
+      } else if (value === null) {
+        return true;
+      } else if (value === false) {
+        return true;
+      } else if(Object.prototype.toString.call(value) === "[object Array]" && value.length === 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+})();;
+// lib/handlebars/runtime.js
+Handlebars.VM = {
+  template: function(templateSpec) {
+    // Just add water
+    var container = {
+      escapeExpression: Handlebars.Utils.escapeExpression,
+      invokePartial: Handlebars.VM.invokePartial,
+      programs: [],
+      program: function(i, fn, data) {
+        var programWrapper = this.programs[i];
+        if(data) {
+          return Handlebars.VM.program(fn, data);
+        } else if(programWrapper) {
+          return programWrapper;
+        } else {
+          programWrapper = this.programs[i] = Handlebars.VM.program(fn);
+          return programWrapper;
+        }
+      },
+      programWithDepth: Handlebars.VM.programWithDepth,
+      noop: Handlebars.VM.noop
+    };
+
+    return function(context, options) {
+      options = options || {};
+      return templateSpec.call(container, Handlebars, context, options.helpers, options.partials, options.data);
+    };
+  },
+
+  programWithDepth: function(fn, data, $depth) {
+    var args = Array.prototype.slice.call(arguments, 2);
+
+    return function(context, options) {
+      options = options || {};
+
+      return fn.apply(this, [context, options.data || data].concat(args));
+    };
+  },
+  program: function(fn, data) {
+    return function(context, options) {
+      options = options || {};
+
+      return fn(context, options.data || data);
+    };
+  },
+  noop: function() { return ""; },
+  invokePartial: function(partial, name, context, helpers, partials, data) {
+    options = { helpers: helpers, partials: partials, data: data };
+
+    if(partial === undefined) {
+      throw new Handlebars.Exception("The partial " + name + " could not be found");
+    } else if(partial instanceof Function) {
+      return partial(context, options);
+    } else if (!Handlebars.compile) {
+      throw new Handlebars.Exception("The partial " + name + " could not be compiled when running in runtime-only mode");
+    } else {
+      partials[name] = Handlebars.compile(partial);
+      return partials[name](context, options);
+    }
+  }
+};
+
+Handlebars.template = Handlebars.VM.template;
+;
 ;
 

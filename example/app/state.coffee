@@ -37,12 +37,8 @@ state =
     @viewport.updates.push ->
       @follow @player
       @forceInside @player, false
-
-    blocks = []
-    blocks.push(new Rogue.Entity({image: assets.red, x: x, y: 0, require: ["sprite","collide","AABB"]})) for x in [0...@viewport.tiles.size[0]]
     
-    @viewport.tiles.place blocks
-
+    @viewport.tiles.place new Rogue.Entity({image: assets.red, x: x, y: 0, require: ["sprite","collide","AABB"]}) for x in [0...@viewport.tiles.size[0]]
   update: (game,dt) ->
     player = game.player
     input = game.input

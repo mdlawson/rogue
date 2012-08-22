@@ -1,2 +1,2 @@
 Rogue.ready ->
-	window.game = require 'game'
+  window.game = require 'game'

@@ -315,9 +315,7 @@ math =
 math.vector = v
 
 # Globals
-
-Rogue = @Rogue   = {}
-module?.exports  = Rogue
+Rogue = {}
 
 Rogue.ticker = window.requestAnimationFrame or 
                window.webkitRequestAnimationFrame or 
@@ -352,3 +350,7 @@ Rogue.Keyboard     = Keyboard
 Rogue.Mouse        = Mouse
 
 Rogue.loglevel = 4
+
+if typeof exports is 'object' then module.exports = Rogue
+else if typeof define is 'function' and define.amd then define(Rogue)
+else @Rogue = Rogue
